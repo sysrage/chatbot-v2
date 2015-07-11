@@ -63,6 +63,7 @@ var SampleApp = function() {
         if (typeof sig === "string") {
            console.log('%s: Received %s - terminating sample app ...',
                        Date(Date.now()), sig);
+           n.kill();
            process.exit(1);
         }
         console.log('%s: Node server stopped.', Date(Date.now()) );
@@ -144,6 +145,9 @@ var SampleApp = function() {
             console.log('%s: Node server started on %s:%d ...',
                         Date(Date.now() ), self.ipaddress, self.port);
         });
+
+        var n = require('child_process').fork(__dirname + '/cu-chatbot.js');
+
     };
 
 };   /*  Sample Application.  */
@@ -157,5 +161,3 @@ var zapp = new SampleApp();
 zapp.initialize();
 zapp.start();
 
-var cp = require('child_process');
-var n = cp.fork(__dirname + '/cu-chatbot.js');
