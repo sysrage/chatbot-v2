@@ -279,7 +279,7 @@ If [server] is specified, all actions will apply to that server. Otherwise, they
 
 // function to check internet connectivity
 function checkInternet(server, cb) {
-    require('dns').lookup(server.name, function(err) {
+    require('dns').lookup(server.address, function(err) {
         if (err && err.code == "ENOTFOUND") {
             cb(false);
         } else {
