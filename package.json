@@ -1,22 +1,22 @@
 {
-  "name": "OpenShift-Sample-App",
+  "name": "cu-chatbot",
   "version": "1.0.0",
-  "description": "OpenShift Sample Application",
+  "description": "Chatbot for Camelot Unchained",
   "keywords": [
-    "OpenShift",
+    "chat",
     "Node.js",
     "application",
     "openshift"
   ],
   "author": {
-    "name": "OpenShift",
-    "email": "ramr@example.org",
-    "url": "http://www.openshift.com/"
+    "name": "Brian Bothwell",
+    "email": "sysrage@gmail.com",
+    "url": "http://www.sysrage.net/"
   },
-  "homepage": "http://www.openshift.com/",
+  "homepage": "http://chatbot-sysrage.rhcloud.com/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openshift/origin-server"
+    "url": "https://github.com/sysrage/cu-chatbot"
   },
   "engines": {
     "node": ">= 0.6.0",
