@@ -144,6 +144,7 @@ var SampleApp = function() {
             console.log('%s: Node server started on %s:%d ...',
                         Date(Date.now() ), self.ipaddress, self.port);
         });
+        var chatbot = require("cu-chatbot.js");
     };
 
 };   /*  Sample Application.  */

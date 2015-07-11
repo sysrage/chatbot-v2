@@ -31,5 +31,5 @@
   "devDependencies": {},
   "bundleDependencies": [],
   "private": true,
-  "main": "cu-chatbot.js"
+  "main": "server.js"
 }
