@@ -144,7 +144,6 @@ var SampleApp = function() {
             console.log('%s: Node server started on %s:%d ...',
                         Date(Date.now() ), self.ipaddress, self.port);
         });
-        var chatbot = require("cu-chatbot.js");
     };
 
 };   /*  Sample Application.  */
@@ -158,3 +157,5 @@ var zapp = new SampleApp();
 zapp.initialize();
 zapp.start();
 
+var cp = require('child_process');
+var n = cp.fork(__dirname + '/cu-chatbot.js');
