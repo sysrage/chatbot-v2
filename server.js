@@ -111,35 +111,52 @@ var SampleApp = function() {
         };
 
         self.routes['/'] = function(req, res) {
-            rAPI = new cuRest({server:'hatchery'});
-            rAPI.getControlGame(null, function(data, error) {
-                if (! error) {
-                    var artScore = data.arthurianScore;
-                    var tuaScore = data.tuathaDeDanannScore;
-                    var vikScore = data.vikingScore;
-                    var timeLeft = data.timeLeft;
-                    var minLeft = Math.floor(timeLeft / 60);
-                    var secLeft = Math.floor(timeLeft % 60);
-                    if (data.gameState === 1) {
-                        var gameState = "Waiting For Next Round";                
-                    } else if (data.gameState === 2) {
-                        var gameState = "Basic Game Active";                
-                    } else if (data.gameState === 3) {
-                        var gameState = "Advanced Game Active";                
-                    }
+            server = {};
+            pageContent = "";
+            config.servers.forEach(function(s) {
+                server[s.name] = s;
 
-                    hatchScore = "There is currently " + minLeft + " minutes and " + secLeft + " seconds left in the round." +
-                        "<br />Game State: " + gameState +
-                        "<br />Arthurian Score: " + artScore +
-                        "<br />TuathaDeDanann Score: " + tuaScore +
-                        "<br />Viking Score: " + vikScore;
-                } else {
-                    hatchScore = "Error accessing API. Server may be down.";
-                }
+                rAPI = new cuRest({server: s.name});
+                rAPI.getControlGame(null, function(data, error) {
+                    if (! error) {
+                        var artScore = data.arthurianScore;
+                        var tuaScore = data.tuathaDeDanannScore;
+                        var vikScore = data.vikingScore;
+                        var timeLeft = data.timeLeft;
+                        var minLeft = Math.floor(timeLeft / 60);
+                        var secLeft = Math.floor(timeLeft % 60);
+                        if (data.gameState === 1) {
+                            var gameState = "Waiting For Next Round";                
+                        } else if (data.gameState === 2) {
+                            var gameState = "Basic Game Active";                
+                        } else if (data.gameState === 3) {
+                            var gameState = "Advanced Game Active";                
+                        }
+
+
+                        server[s.name].score = "There is currently " + minLeft + " minutes and " + secLeft + " seconds left in the round." + "<br />&nbsp;" +
+                            "<br /><b>Game State:</b> " + gameState +
+                            "<br /><b>Arthurian Score:</b> " + artScore +
+                            "<br /><b>TuathaDeDanann Score:</b> " + tuaScore +
+                            "<br /><b>Viking Score:</b> " + vikScore;
+
+                        pageContent = pageContent + '<tr><center><b>' + s.name + '</b></center></tr>'
+                                '<tr><td width="50%" bgcolor="#606060" style="border-style:groove; border-color:#C0C0C0">' +
+                                '<center><b>Current Score</b></center>' +
+                                server[s.name].score +
+                                '</td><td width="50%" bgcolor="#606060" style="border-style:groove; border-color:#C0C0C0">' +
+                                '<center><b>Leader Board</b></center>' +
+                                '##LEADERBOARD##' +
+                                '</td></tr>';
+
+                    } else {
+                        server[s.name].score = "Error accessing API. Server may be down.";
+                    }
+                });
             });
 
             res.setHeader('Content-Type', 'text/html');
-            res.send(self.cache_get('index.html').toString().replace('##SCORE##', hatchScore));
+            res.send(self.cache_get('index.html').toString().replace('##PAGECONTENT##', pageContent));
         };
     };
 
