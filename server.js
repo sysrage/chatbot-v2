@@ -3,7 +3,7 @@
 var express = require('express');
 var fs      = require('fs');
 
-var cuRest = require('./cu-rest.js');
+var cuRest2 = require('./cu-rest.js');
 var config = require('./cu-chatbot.cfg');
 
 /**
@@ -111,8 +111,8 @@ var SampleApp = function() {
         };
 
         self.routes['/'] = function(req, res) {
-            cuRest = new cuRest({server:'hatchery'});
-            cuRest.getControlGame(null, function(data, error) {
+            cuRest3 = new cuRest2({server:'hatchery'});
+            cuRest3.getControlGame(null, function(data, error) {
             if (! error) {
                 var artScore = data.arthurianScore;
                 var tuaScore = data.tuathaDeDanannScore;
