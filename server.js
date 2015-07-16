@@ -108,13 +108,13 @@ var SampleApp = function() {
 <head>\
     <meta charset="utf-8">\
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">\
-    <title>Camelot Unchained Game Statistics</title>\
+    <title>Camelot Unchained Server Statistics</title>\
 </head>\
-<body background="/images/Bg1.jpg">\
+<body style="background-repeat: repeat-n;" backround="/images/Bg1.jpg">\
     <table border="0" width="100%">\
         <tr height="230"><td><center>\
             <img src="/images/cu2_title03.jpg" /><br />\
-            <h1 style="color:#C0C0C0; text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;">Game Statistics</h1>\
+            <h1 style="color:#C0C0C0; text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;">Server Statistics</h1>\
         </center></td></tr>\
         <tr><td>\
             <center>\
