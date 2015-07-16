@@ -101,11 +101,8 @@ var SampleApp = function() {
         };
 
         self.routes['/'] = function(req, res) {
-            res.setHeader('Content-Type', 'text/html');
-            res.send(self.cache_get('index.html') );
-        };
+            var hatcheryScore = 'Score for Hatchery';
 
-        self.routes['/test'] = function(req, res) {
             res.setHeader('Content-Type', 'text/html');
             res.send('\
 <head>\
@@ -123,7 +120,7 @@ var SampleApp = function() {
             <center>\
             <table width="80%">\
                 <tr><td width="50%" bgcolor="#606060" style="border-style:groove; border-color:#C0C0C0">\
-                    <center>Current Score</center>\
+                    <center>Current Score<br />' + hatcheryScore + '</center>\
                 </td><td width="50%" bgcolor="#606060" style="border-style:groove; border-color:#C0C0C0">\
                     <center>Leader Board</center>\
                 </td>\
@@ -132,6 +129,11 @@ var SampleApp = function() {
         </td></tr>\
 </body>\
             ');
+        };
+
+        self.routes['/test'] = function(req, res) {
+            res.setHeader('Content-Type', 'text/html');
+            res.send(self.cache_get('index.html') );
         };
     };
 
