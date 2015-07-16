@@ -770,6 +770,20 @@ function checkLastStanza(server) {
 // Time to monitor control game.
 var timerControlGame = function(server) { return setInterval(function() {controlGame(server); }, 1000); };
 function controlGame(server) {
+    // Check to make sure game server is up.
+    client[server.name].cuRest.getServers(function(data, error) {
+        if (! error) {
+            var gameServerUp = false;
+            for (var i = 0; i < data.length; i++) {
+                if (data[i].name !== server.name) gameServerUp = true;
+            }
+            if (! gameServerUp) return;
+        } else {
+            util.log("[ERROR] Unable to pull server list.");
+            return;
+        }
+    });
+
     // Poll API for latest control game data.
     client[server.name].cuRest.getControlGame(null, function(cgData, cgError) {
         if (! cgError) {
@@ -788,10 +802,6 @@ function controlGame(server) {
                     var tuaCount = pData.tuathaDeDanann;
                     var vikCount = pData.vikings;
                     var totalPlayers = pData.arthurians + pData.tuathaDeDanann + pData.vikings;
-
-                    // Update stored player count to be used for !who data (see .on "join")
-                    //client[server.name].lastPlayerCount = client[server.name].playerCount;
-                    //client[server.name].playerCount = totalPlayers;
 
                     if (! client[server.name].currentGame) {
                         // Bot was just started, do some initialization
@@ -817,21 +827,40 @@ function controlGame(server) {
 
                     if ((gameState === 1) && ! client[server.name].currentGame.ended) {
                         // Game we were monitoring has ended. Save stats.
-                        if (artScore > tuaScore) {
-                            if (artScore > vikScore) {
-                                // Arthurians win
-                                gameStats[server.name].artWins++;
-                            } else {
-                                // Vikings win
-                                gameStats[server.name].vikWins++;
-                            }
+                        if (artScore === tuaScore && artScore === vikScore) {
+                            // Three way tie
+                            gameStats[server.name].artWins++;
+                            gameStats[server.name].tuaWins++;
+                            gameStats[server.name].vikWins++;
+                        } else if (artScore === tuaScore && artScore > vikScore) {
+                            // Arthurians and TDD tie
+                            gameStats[server.name].artWins++;
+                            gameStats[server.name].tuaWins++;
+                        } else if (artScore === vikScore && artScore > tuaScore) {
+                            // Arthurians and Vikings tie
+                            gameStats[server.name].artWins++;
+                            gameStats[server.name].vikWins++;
+                        } else if (tuaScore === vikScore && tuaScore > artScore) {
+                            // TDD and Vikings tie
+                            gameStats[server.name].tuaWins++;
+                            gameStats[server.name].vikWins++;
                         } else {
-                            if (tuaScore > vikScore) {
-                                // TDD win
-                                gameStats[server.name].tuaWins++;
+                            if (artScore > tuaScore) {
+                                if (artScore > vikScore) {
+                                    // Arthurians win
+                                    gameStats[server.name].artWins++;
+                                } else {
+                                    // Vikings win
+                                    gameStats[server.name].vikWins++;
+                                }
                             } else {
-                                // Vikings win
-                                gameStats[server.name].vikWins++;
+                                if (tuaScore > vikScore) {
+                                    // TDD win
+                                    gameStats[server.name].tuaWins++;
+                                } else {
+                                    // Vikings win
+                                    gameStats[server.name].vikWins++;
+                                }
                             }
                         }
 
@@ -912,27 +941,12 @@ function controlGame(server) {
                     //     });
                     //     client[server.name].lastBegTime = epochTime;
                     // }
-
-                    /////////////////////////
-
-                    // if lastSave was more than 30 min ago, save and start over
-                    // if timeLeft > config.gameLength show an error and increase gameLength?
-
-                    // playerStats[server.name] = [{
-                    //     name: '',
-                    //     wins: 0,
-                    //     losses: 0,
-                    //     kills: 0,
-                    //     deaths: 0,
-                    //     gamesPlayed: 0,
-                    // }];
                 }
             });
         } else {
             // Unable to pull API data. Server is likely down.
             var gameState = -1;
-
-            // check lastSave.. if > 30 min, save incomplete game data or throw it away?
+            util.log("[ERROR] Server is up but controlgame API is not responding.");
         }
     });
 }
@@ -1052,7 +1066,7 @@ function startClient(server) {
             // Parse each stanza from the XMPP server
             client[server.name].xmpp.on('stanza', function(stanza) {
 
-                 util.log('***** ' + stanza + ' *****');
+                 // util.log('***** ' + stanza + ' *****');
 
                 // Store time of last received stanza for checking connection status
                 server.lastStanza = Math.floor((new Date).getTime() / 1000);
