@@ -3,7 +3,7 @@
 var express = require('express');
 var fs      = require('fs');
 
-var cuRest2 = require('./cu-rest.js');
+var cuRest = require('./cu-rest.js');
 var config = require('./cu-chatbot.cfg');
 
 /**
@@ -111,8 +111,8 @@ var SampleApp = function() {
         };
 
         self.routes['/'] = function(req, res) {
-            cuRest3 = new cuRest2({server:'hatchery'});
-            cuRest3.getControlGame(null, function(data, error) {
+            rAPI = new cuRest({server:'hatchery'});
+            rAPI.getControlGame(null, function(data, error) {
             if (! error) {
                 var artScore = data.arthurianScore;
                 var tuaScore = data.tuathaDeDanannScore;
@@ -135,7 +135,7 @@ var SampleApp = function() {
                     "<br />Viking Score: " + vikScore;
             } else {
                 hatchScore = "Error accessing API. Server may be down.";
-            }
+            });
 
             res.setHeader('Content-Type', 'text/html');
             res.send(self.cache_get('index.html').toString().replace('##SCORE##', hatchScore));
