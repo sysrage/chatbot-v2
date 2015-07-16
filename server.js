@@ -108,30 +108,30 @@ var SampleApp = function() {
 
         self.routes['/test'] = function(req, res) {
             res.setHeader('Content-Type', 'text/html');
-            res.send('
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title>Camelot Unchained Game Statistics</title>
-</head>
-<body background="images/Bg1.jpg">
-    <table border="0" width="100%">
-        <tr height="230"><td><center>
-            <img src="images/cu2_title03.jpg" /><br />
-            <h1 style="color:#C0C0C0; text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;">Game Statistics</h1>
-        </center></td></tr>
-        <tr><td>
-            <center>
-            <table width="80%">
-                <tr><td width="50%" bgcolor="#606060" style="border-style:groove; border-color:#C0C0C0">
-                    <center>Current Score</center>
-                </td><td width="50%" bgcolor="#606060" style="border-style:groove; border-color:#C0C0C0">
-                    <center>Leader Board</center>
-                </td>
-            </table>
-            </center>
-        </td></tr>
-</body>
+            res.send('\
+<head>\
+    <meta charset="utf-8">\
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">\
+    <title>Camelot Unchained Game Statistics</title>\
+</head>\
+<body background="images/Bg1.jpg">\
+    <table border="0" width="100%">\
+        <tr height="230"><td><center>\
+            <img src="images/cu2_title03.jpg" /><br />\
+            <h1 style="color:#C0C0C0; text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;">Game Statistics</h1>\
+        </center></td></tr>\
+        <tr><td>\
+            <center>\
+            <table width="80%">\
+                <tr><td width="50%" bgcolor="#606060" style="border-style:groove; border-color:#C0C0C0">\
+                    <center>Current Score</center>\
+                </td><td width="50%" bgcolor="#606060" style="border-style:groove; border-color:#C0C0C0">\
+                    <center>Leader Board</center>\
+                </td>\
+            </table>\
+            </center>\
+        </td></tr>\
+</body>\
             ');
         };
     };
