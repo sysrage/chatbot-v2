@@ -3,8 +3,6 @@
 var express = require('express');
 var fs      = require('fs');
 
-app.use('/images', express.static(__dirname+'/images'));
-
 /**
  *  Define the sample application.
  */
@@ -145,6 +143,8 @@ var SampleApp = function() {
     self.initializeServer = function() {
         self.createRoutes();
         self.app = express.createServer();
+
+        self.app.use('/images', express.static(__dirname+'/images'));
 
         //  Add handlers for the app (from the routes).
         for (var r in self.routes) {
