@@ -3,6 +3,9 @@
 var express = require('express');
 var fs      = require('fs');
 
+var cuRest = require('./cu-rest.js');
+var config = require('./cu-chatbot.cfg');
+
 /**
  *  Define the sample application.
  */
@@ -108,8 +111,34 @@ var SampleApp = function() {
         };
 
         self.routes['/'] = function(req, res) {
+            cuRest = new cuRest({server:'hatchery'});
+            cuRest.getControlGame(null, function(data, error) {
+            if (! error) {
+                var artScore = data.arthurianScore;
+                var tuaScore = data.tuathaDeDanannScore;
+                var vikScore = data.vikingScore;
+                var timeLeft = data.timeLeft;
+                var minLeft = Math.floor(timeLeft / 60);
+                var secLeft = Math.floor(timeLeft % 60);
+                if (data.gameState === 1) {
+                    var gameState = "Waiting For Next Round";                
+                } else if (data.gameState === 2) {
+                    var gameState = "Basic Game Active";                
+                } else if (data.gameState === 3) {
+                    var gameState = "Advanced Game Active";                
+                }
+
+                hatchScore = "There is currently " + minLeft + " minutes and " + secLeft + " seconds left in the round." +
+                    "<br />Game State: " + gameState +
+                    "<br />Arthurian Score: " + artScore +
+                    "<br />TuathaDeDanann Score: " + tuaScore +
+                    "<br />Viking Score: " + vikScore;
+            } else {
+                hatchScore = "Error accessing API. Server may be down.";
+            }
+
             res.setHeader('Content-Type', 'text/html');
-            res.send(self.cache_get('index.html').toString().replace('##SCORE##', "this is a test"));
+            res.send(self.cache_get('index.html').toString().replace('##SCORE##', hatchScore));
         };
     };
 
