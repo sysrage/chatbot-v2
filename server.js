@@ -110,7 +110,7 @@ var SampleApp = function() {
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">\
     <title>Camelot Unchained Server Statistics</title>\
 </head>\
-<body style="background-repeat: repeat-n; backround-image:url(\'/images/Bg1.jpg\');"">\
+<body style="background-repeat: repeat-y; backround-image:url(\'/images/Bg1.jpg\');"">\
     <table border="0" width="100%">\
         <tr height="230"><td><center>\
             <img src="/images/cu2_title03.jpg" /><br />\
