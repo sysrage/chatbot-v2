@@ -309,4 +309,4 @@ var zapp = new SampleApp();
 zapp.initialize();
 zapp.start();
 
-var n = require('child_process').fork(__dirname + '/cu-chatbot.js');
+// var n = require('child_process').fork(__dirname + '/cu-chatbot.js');
