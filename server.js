@@ -100,38 +100,14 @@ var SampleApp = function() {
             res.send("<html><body><img src='" + link + "'></body></html>");
         };
 
-        self.routes['/'] = function(req, res) {
+        self.routes['/test'] = function(req, res) {
             var hatcheryScore = 'Score for Hatchery';
 
             res.setHeader('Content-Type', 'text/html');
-            res.send('\
-<head>\
-    <meta charset="utf-8">\
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">\
-    <title>Camelot Unchained Server Statistics</title>\
-</head>\
-<body style="background-repeat: repeat-y; backround-image:url(\'/images/Bg1.jpg\');"">\
-    <table border="0" width="100%">\
-        <tr height="230"><td><center>\
-            <img src="/images/cu2_title03.jpg" /><br />\
-            <h1 style="color:#C0C0C0; text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;">Server Statistics</h1>\
-        </center></td></tr>\
-        <tr><td>\
-            <center>\
-            <table width="80%">\
-                <tr><td width="50%" bgcolor="#606060" style="border-style:groove; border-color:#C0C0C0">\
-                    <center>Current Score<br />' + hatcheryScore + '</center>\
-                </td><td width="50%" bgcolor="#606060" style="border-style:groove; border-color:#C0C0C0">\
-                    <center>Leader Board</center>\
-                </td>\
-            </table>\
-            </center>\
-        </td></tr>\
-</body>\
-            ');
+            res.send('test');
         };
 
-        self.routes['/test'] = function(req, res) {
+        self.routes['/'] = function(req, res) {
             res.setHeader('Content-Type', 'text/html');
             res.send(self.cache_get('index.html').toString().replace('##SCORE##', "this is a test"));
         };
