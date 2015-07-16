@@ -113,28 +113,29 @@ var SampleApp = function() {
         self.routes['/'] = function(req, res) {
             rAPI = new cuRest({server:'hatchery'});
             rAPI.getControlGame(null, function(data, error) {
-            if (! error) {
-                var artScore = data.arthurianScore;
-                var tuaScore = data.tuathaDeDanannScore;
-                var vikScore = data.vikingScore;
-                var timeLeft = data.timeLeft;
-                var minLeft = Math.floor(timeLeft / 60);
-                var secLeft = Math.floor(timeLeft % 60);
-                if (data.gameState === 1) {
-                    var gameState = "Waiting For Next Round";                
-                } else if (data.gameState === 2) {
-                    var gameState = "Basic Game Active";                
-                } else if (data.gameState === 3) {
-                    var gameState = "Advanced Game Active";                
-                }
+                if (! error) {
+                    var artScore = data.arthurianScore;
+                    var tuaScore = data.tuathaDeDanannScore;
+                    var vikScore = data.vikingScore;
+                    var timeLeft = data.timeLeft;
+                    var minLeft = Math.floor(timeLeft / 60);
+                    var secLeft = Math.floor(timeLeft % 60);
+                    if (data.gameState === 1) {
+                        var gameState = "Waiting For Next Round";                
+                    } else if (data.gameState === 2) {
+                        var gameState = "Basic Game Active";                
+                    } else if (data.gameState === 3) {
+                        var gameState = "Advanced Game Active";                
+                    }
 
-                hatchScore = "There is currently " + minLeft + " minutes and " + secLeft + " seconds left in the round." +
-                    "<br />Game State: " + gameState +
-                    "<br />Arthurian Score: " + artScore +
-                    "<br />TuathaDeDanann Score: " + tuaScore +
-                    "<br />Viking Score: " + vikScore;
-            } else {
-                hatchScore = "Error accessing API. Server may be down.";
+                    hatchScore = "There is currently " + minLeft + " minutes and " + secLeft + " seconds left in the round." +
+                        "<br />Game State: " + gameState +
+                        "<br />Arthurian Score: " + artScore +
+                        "<br />TuathaDeDanann Score: " + tuaScore +
+                        "<br />Viking Score: " + vikScore;
+                } else {
+                    hatchScore = "Error accessing API. Server may be down.";
+                }
             });
 
             res.setHeader('Content-Type', 'text/html');
