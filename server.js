@@ -6,6 +6,53 @@ var fs      = require('fs');
 var cuRest = require('./cu-rest.js');
 var config = require('./cu-chatbot.cfg');
 
+
+
+// function to read in the saved game stats
+function getGameStats(server, callback) {
+    fs.readFile(server.gameFile, function(err, data) {
+        if (err && err.code === 'ENOENT') {
+            var gameStats = {
+                firstGame: Math.floor((new Date).getTime() / 1000),
+                gameNumber: 0,
+                lastStartTime: 0,
+                artWins: 0,
+                tuaWins: 0,
+                vikWins: 0
+            };
+
+            fs.writeFile(server.gameFile, JSON.stringify(gameStats), function(err) {
+                if (err) {
+                    return console.log("[ERROR] Unable to create game stats file.");
+                }
+                console.log("[STATUS] Game stats file did not exist. Empty file created.");
+            });
+        } else {
+            var gameStats = JSON.parse(data);
+        }
+        callback(gameStats);
+    });
+}
+
+// function to read in the saved player stats
+function getPlayerStats(server, callback) {
+    fs.readFile(server.playerFile, function(err, data) {
+        if (err && err.code === 'ENOENT') {
+            var playerStats = [];
+
+            fs.writeFile(server.playerFile, JSON.stringify(playerStats), function(err) {
+                if (err) {
+                    return console.log("[ERROR] Unable to create player stats file.");
+                }
+                console.log("[STATUS] Player stats file did not exist. Empty file created.");
+            });
+        } else {
+            var playerStats = JSON.parse(data);
+        }
+        callback(playerStats);
+    });    
+}
+
 /**
  *  Define the sample application.
  */
@@ -113,11 +160,10 @@ var SampleApp = function() {
         self.routes['/'] = function(req, res) {
             server = {};
             pageContent = "";
-            config.servers.forEach(function(s) {
+            config.servers.forEach(function(s, index) {
                 server[s.name] = s;
-
-                rAPI = new cuRest({server: s.name});
-                rAPI.getControlGame(null, function(data, error) {
+                server[s.name].rAPI = new cuRest({server: s.name});
+                server[s.name].rAPI.getControlGame(null, function(data, error) {
                     if (! error) {
                         var artScore = data.arthurianScore;
                         var tuaScore = data.tuathaDeDanannScore;
@@ -133,30 +179,80 @@ var SampleApp = function() {
                             var gameState = "Advanced Game Active";                
                         }
 
-
-                        server[s.name].score = "There is currently " + minLeft + " minutes and " + secLeft + " seconds left in the round." + "<br />&nbsp;" +
-                            "<br /><b>Game State:</b> " + gameState +
+                        server[s.name].score = "<b>Game State:</b> " + gameState +
+                            "<br /><b>Time Remaining:</b> " + minLeft + " minutes and " + secLeft + " seconds" +
                             "<br /><b>Arthurian Score:</b> " + artScore +
                             "<br /><b>TuathaDeDanann Score:</b> " + tuaScore +
                             "<br /><b>Viking Score:</b> " + vikScore;
-
-                        pageContent = pageContent + '<tr><center><b>' + s.name + '</b></center></tr>'
-                                '<tr><td width="50%" bgcolor="#606060" style="border-style:groove; border-color:#C0C0C0">' +
-                                '<center><b>Current Score</b></center>' +
-                                server[s.name].score +
-                                '</td><td width="50%" bgcolor="#606060" style="border-style:groove; border-color:#C0C0C0">' +
-                                '<center><b>Leader Board</b></center>' +
-                                '##LEADERBOARD##' +
-                                '</td></tr>';
-
                     } else {
                         server[s.name].score = "Error accessing API. Server may be down.";
                     }
+
+                    getGameStats(server[s.name], function(gs) {
+                        server[s.name].wins = "<b>Total Games Played:</b> " + gs.gameNumber +
+                            "<br /><b>Arthurian Wins:</b> " + gs.artWins +
+                            "<br /><b>TuathaDeDanann Wins:</b> " + gs.tuaWins +
+                            "<br /><b>Viking Wins:</b> " + gs.vikWins;
+
+                        getPlayerStats(server[s.name], function(ps) {
+
+                            var playersSortedByKills = ps.sort(function(a, b) {
+                                if (a.kills > b.kills) return 1;
+                                if (a.kills < b.kills) return -1;
+                                return 0;
+                            });
+                            var playersSortedByDeaths = ps.sort(function(a, b) {
+                                if (a.deaths > b.deaths) return 1;
+                                if (a.deaths < b.deaths) return -1;
+                                return 0;
+                            });
+
+                            server[s.name].leaderboard = '<table width="100%"><tr>' +
+                                '<td width="50%"><b>Kills:</b>' +
+                                "<br /><b>&nbsp;&nbsp;#1</b> " + playersSortedByKills[0] +
+                                "<br /><b>&nbsp;&nbsp;#2</b> " + playersSortedByKills[1] +
+                                "<br /><b>&nbsp;&nbsp;#3</b> " + playersSortedByKills[2] +
+                                "<br /><b>&nbsp;&nbsp;#4</b> " + playersSortedByKills[3] +
+                                "<br /><b>&nbsp;&nbsp;#5</b> " + playersSortedByKills[4] +
+                                "<br /><b>&nbsp;&nbsp;#6</b> " + playersSortedByKills[5] +
+                                "<br /><b>&nbsp;&nbsp;#7</b> " + playersSortedByKills[6] +
+                                "<br /><b>&nbsp;&nbsp;#8</b> " + playersSortedByKills[7] +
+                                "<br /><b>&nbsp;&nbsp;#9</b> " + playersSortedByKills[8] +
+                                "<br /><b>&nbsp;&nbsp;#10</b> " + playersSortedByKills[9] +
+
+                                '</td><td width="50%"><b>Deaths:</b>' +
+                                "<br /><b>&nbsp;&nbsp;#1</b> " + playersSortedByDeaths[0] +
+                                "<br /><b>&nbsp;&nbsp;#2</b> " + playersSortedByDeaths[1] +
+                                "<br /><b>&nbsp;&nbsp;#3</b> " + playersSortedByDeaths[2] +
+                                "<br /><b>&nbsp;&nbsp;#4</b> " + playersSortedByDeaths[3] +
+                                "<br /><b>&nbsp;&nbsp;#5</b> " + playersSortedByDeaths[4] +
+                                "<br /><b>&nbsp;&nbsp;#6</b> " + playersSortedByDeaths[5] +
+                                "<br /><b>&nbsp;&nbsp;#7</b> " + playersSortedByDeaths[6] +
+                                "<br /><b>&nbsp;&nbsp;#8</b> " + playersSortedByDeaths[7] +
+                                "<br /><b>&nbsp;&nbsp;#9</b> " + playersSortedByDeaths[8] +
+                                "<br /><b>&nbsp;&nbsp;#10</b> " + playersSortedByDeaths[9] +
+                                "</td></tr></table>";
+
+                            pageContent = pageContent + '<tr><td colspan="3"><center><h2 style="color:#C0C0C0; text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;">' + s.name.charAt(0).toUpperCase() + s.name.slice(1) + '</h2></center></td></tr>' +
+                                    '<tr><td valign="top" width="33%" bgcolor="#606060" style="border-style:groove; border-color:#C0C0C0">' +
+                                    '<center><b>Realm Win History</b><br />&nbsp;</center>' +
+                                    server[s.name].wins +
+                                    '</td><td valign="top" width="34%" bgcolor="#606060" style="border-style:groove; border-color:#C0C0C0">' +
+                                    '<center><b>Current Score</b><br />&nbsp;</center>' +
+                                    server[s.name].score +
+                                    '</td><td valign="top" width="33%" bgcolor="#606060" style="border-style:groove; border-color:#C0C0C0">' +
+                                    '<center><b>Leader Board</b></center>' +
+                                    server[s.name].leaderboard +
+                                    '</td></tr>';
+
+                            if ((config.servers.length -1) === index) {
+                                res.setHeader('Content-Type', 'text/html');
+                                res.send(self.cache_get('index.html').toString().replace('##PAGECONTENT##', pageContent));
+                            }
+                        });
+                    });
                 });
             });
-
-            res.setHeader('Content-Type', 'text/html');
-            res.send(self.cache_get('index.html').toString().replace('##PAGECONTENT##', pageContent));
         };
     };
 
