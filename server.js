@@ -180,70 +180,69 @@ var SampleApp = function() {
                         }
 
                         server[s.name].score = "<b>Game State:</b> " + gameState +
-                            "<br /><b>Time Remaining:</b> " + minLeft + " minutes and " + secLeft + " seconds" +
+                            "<br /><b>Time Remaining:</b> " + minLeft + " min. " + secLeft + " sec." +
                             "<br /><b>Arthurian Score:</b> " + artScore +
                             "<br /><b>TuathaDeDanann Score:</b> " + tuaScore +
                             "<br /><b>Viking Score:</b> " + vikScore;
                     } else {
-                        server[s.name].score = "Error accessing API. Server may be down.";
+                        server[s.name].score = '<p style="color: #610B0B; margin-top: 1px; margin-bottom: 1px; margin-left: 1px; margin-right: 1px;">Error accessing API. Server may be down.';
                     }
 
                     getGameStats(server[s.name], function(gs) {
-                        server[s.name].wins = "<b>Total Games Played:</b> " + gs.gameNumber +
+                        server[s.name].wins = "<b>Total Rounds Played:</b> " + gs.gameNumber +
                             "<br /><b>Arthurian Wins:</b> " + gs.artWins +
                             "<br /><b>TuathaDeDanann Wins:</b> " + gs.tuaWins +
                             "<br /><b>Viking Wins:</b> " + gs.vikWins;
 
                         getPlayerStats(server[s.name], function(ps) {
 
-                            var playersSortedByKills = ps.sort(function(a, b) {
-                                if (a.kills > b.kills) return 1;
-                                if (a.kills < b.kills) return -1;
-                                return 0;
-                            });
-                            var playersSortedByDeaths = ps.sort(function(a, b) {
-                                if (a.deaths > b.deaths) return 1;
-                                if (a.deaths < b.deaths) return -1;
-                                return 0;
-                            });
+                            for (var i = 0; i < 10; i++) {
+                                if (! ps[i]) ps[i] = {name: 'Nobody', kills: 0, deaths: 0};
+                            }
+
+                            var playersSortedByKills = ps.concat().sort(function(a, b) { return b.kills - a.kills; });
+                            var playersSortedByDeaths = ps.concat().sort(function(a, b) { return b.deaths - a.deaths; });
 
                             server[s.name].leaderboard = '<table width="100%"><tr>' +
                                 '<td width="50%"><b>Kills:</b>' +
-                                "<br /><b>&nbsp;&nbsp;#1</b> " + playersSortedByKills[0] +
-                                "<br /><b>&nbsp;&nbsp;#2</b> " + playersSortedByKills[1] +
-                                "<br /><b>&nbsp;&nbsp;#3</b> " + playersSortedByKills[2] +
-                                "<br /><b>&nbsp;&nbsp;#4</b> " + playersSortedByKills[3] +
-                                "<br /><b>&nbsp;&nbsp;#5</b> " + playersSortedByKills[4] +
-                                "<br /><b>&nbsp;&nbsp;#6</b> " + playersSortedByKills[5] +
-                                "<br /><b>&nbsp;&nbsp;#7</b> " + playersSortedByKills[6] +
-                                "<br /><b>&nbsp;&nbsp;#8</b> " + playersSortedByKills[7] +
-                                "<br /><b>&nbsp;&nbsp;#9</b> " + playersSortedByKills[8] +
-                                "<br /><b>&nbsp;&nbsp;#10</b> " + playersSortedByKills[9] +
+                                "<br /><b>&nbsp;&nbsp;#1</b> " + playersSortedByKills[0].name + ' - ' + playersSortedByKills[0].kills +
+                                "<br /><b>&nbsp;&nbsp;#2</b> " + playersSortedByKills[1].name + ' - ' + playersSortedByKills[1].kills +
+                                "<br /><b>&nbsp;&nbsp;#3</b> " + playersSortedByKills[2].name + ' - ' + playersSortedByKills[2].kills +
+                                "<br /><b>&nbsp;&nbsp;#4</b> " + playersSortedByKills[3].name + ' - ' + playersSortedByKills[3].kills +
+                                "<br /><b>&nbsp;&nbsp;#5</b> " + playersSortedByKills[4].name + ' - ' + playersSortedByKills[4].kills +
+                                "<br /><b>&nbsp;&nbsp;#6</b> " + playersSortedByKills[5].name + ' - ' + playersSortedByKills[5].kills +
+                                "<br /><b>&nbsp;&nbsp;#7</b> " + playersSortedByKills[6].name + ' - ' + playersSortedByKills[6].kills +
+                                "<br /><b>&nbsp;&nbsp;#8</b> " + playersSortedByKills[7].name + ' - ' + playersSortedByKills[7].kills +
+                                "<br /><b>&nbsp;&nbsp;#9</b> " + playersSortedByKills[8].name + ' - ' + playersSortedByKills[8].kills +
+                                "<br /><b>&nbsp;&nbsp;#10</b> " + playersSortedByKills[9].name + ' - ' + playersSortedByKills[9].kills +
 
                                 '</td><td width="50%"><b>Deaths:</b>' +
-                                "<br /><b>&nbsp;&nbsp;#1</b> " + playersSortedByDeaths[0] +
-                                "<br /><b>&nbsp;&nbsp;#2</b> " + playersSortedByDeaths[1] +
-                                "<br /><b>&nbsp;&nbsp;#3</b> " + playersSortedByDeaths[2] +
-                                "<br /><b>&nbsp;&nbsp;#4</b> " + playersSortedByDeaths[3] +
-                                "<br /><b>&nbsp;&nbsp;#5</b> " + playersSortedByDeaths[4] +
-                                "<br /><b>&nbsp;&nbsp;#6</b> " + playersSortedByDeaths[5] +
-                                "<br /><b>&nbsp;&nbsp;#7</b> " + playersSortedByDeaths[6] +
-                                "<br /><b>&nbsp;&nbsp;#8</b> " + playersSortedByDeaths[7] +
-                                "<br /><b>&nbsp;&nbsp;#9</b> " + playersSortedByDeaths[8] +
-                                "<br /><b>&nbsp;&nbsp;#10</b> " + playersSortedByDeaths[9] +
+                                "<br /><b>&nbsp;&nbsp;#1</b> " + playersSortedByDeaths[0].name + ' - ' + playersSortedByDeaths[0].deaths +
+                                "<br /><b>&nbsp;&nbsp;#2</b> " + playersSortedByDeaths[1].name + ' - ' + playersSortedByDeaths[1].deaths +
+                                "<br /><b>&nbsp;&nbsp;#3</b> " + playersSortedByDeaths[2].name + ' - ' + playersSortedByDeaths[2].deaths +
+                                "<br /><b>&nbsp;&nbsp;#4</b> " + playersSortedByDeaths[3].name + ' - ' + playersSortedByDeaths[3].deaths +
+                                "<br /><b>&nbsp;&nbsp;#5</b> " + playersSortedByDeaths[4].name + ' - ' + playersSortedByDeaths[4].deaths +
+                                "<br /><b>&nbsp;&nbsp;#6</b> " + playersSortedByDeaths[5].name + ' - ' + playersSortedByDeaths[5].deaths +
+                                "<br /><b>&nbsp;&nbsp;#7</b> " + playersSortedByDeaths[6].name + ' - ' + playersSortedByDeaths[6].deaths +
+                                "<br /><b>&nbsp;&nbsp;#8</b> " + playersSortedByDeaths[7].name + ' - ' + playersSortedByDeaths[7].deaths +
+                                "<br /><b>&nbsp;&nbsp;#9</b> " + playersSortedByDeaths[8].name + ' - ' + playersSortedByDeaths[8].deaths +
+                                "<br /><b>&nbsp;&nbsp;#10</b> " + playersSortedByDeaths[9].name + ' - ' + playersSortedByDeaths[9].deaths +
                                 "</td></tr></table>";
 
-                            pageContent = pageContent + '<tr><td colspan="3"><center><h2 style="color:#C0C0C0; text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;">' + s.name.charAt(0).toUpperCase() + s.name.slice(1) + '</h2></center></td></tr>' +
-                                    '<tr><td valign="top" width="33%" bgcolor="#606060" style="border-style:groove; border-color:#C0C0C0">' +
-                                    '<center><b>Realm Win History</b><br />&nbsp;</center>' +
-                                    server[s.name].wins +
-                                    '</td><td valign="top" width="34%" bgcolor="#606060" style="border-style:groove; border-color:#C0C0C0">' +
-                                    '<center><b>Current Score</b><br />&nbsp;</center>' +
-                                    server[s.name].score +
-                                    '</td><td valign="top" width="33%" bgcolor="#606060" style="border-style:groove; border-color:#C0C0C0">' +
-                                    '<center><b>Leader Board</b></center>' +
-                                    server[s.name].leaderboard +
-                                    '</td></tr>';
+                            pageContent = pageContent +
+                                    '<tr><td colspan="3"><center><h2 style="color:#C0C0C0; text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;">' + s.name.charAt(0).toUpperCase() + s.name.slice(1) + '</h2></center></td></tr><tr>' +
+                                    '<td valign="top" width="30%" bgcolor="#606060" style="border-style:groove; border-color:#C0C0C0"><table width="100%">' +
+                                        '<tr><td bgcolor="#F3E2A9"><center><p style="color: #61380B; margin-top: 1px; margin-bottom: 1px; margin-left: 1px; margin-right: 1px; text-shadow: 1px 1px 2px #000000;">Current Score</p></center></td></tr>' +
+                                        '<tr><td>' + server[s.name].score + '</td></tr>' +
+                                    '</table></td>' +
+                                    '<td valign="top" width="40%" bgcolor="#606060" style="border-style:groove; border-color:#C0C0C0"><table width="100%">' +
+                                        '<tr><td bgcolor="#F3E2A9"><center><p style="color: #61380B; margin-top: 1px; margin-bottom: 1px; margin-left: 1px; margin-right: 1px; text-shadow: 1px 1px 2px #000000;">Leader Board</p></center></td></tr>' +
+                                        '<tr><td>' + server[s.name].leaderboard + '</td></tr>' +
+                                    '</table></td>' +
+                                    '<td valign="top" width="30%" bgcolor="#606060" style="border-style:groove; border-color:#C0C0C0"><table width="100%">' +
+                                        '<tr><td bgcolor="#F3E2A9"><center><p style="color: #61380B; margin-top: 1px; margin-bottom: 1px; margin-left: 1px; margin-right: 1px; text-shadow: 1px 1px 2px #000000;">Realm History</p></center></td></tr>' +
+                                        '<tr><td>' + server[s.name].wins + '</td></tr>' +
+                                    '</table></td></tr>';
 
                             if ((config.servers.length -1) === index) {
                                 res.setHeader('Content-Type', 'text/html');
