@@ -18,7 +18,6 @@ function restAPI(options) {
     } else {
         server = options.server;
     }
-    console.log('server: ' + server);
     return this;
 }
 

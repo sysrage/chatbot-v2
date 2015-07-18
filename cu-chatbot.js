@@ -284,6 +284,7 @@ var chatCommands = [
             var targetServer = server;
         }
 
+        console.log('*** targetServer: ' + targetServer);
         targetServer.cuRest.getPlayers(function(data, error) {
             if (! error) {
                 var players = data;
