@@ -1222,7 +1222,7 @@ var gameStats = [];
 var playerStats = [];
 config.servers.forEach(function(server) {
     // Connect to REST API
-    server.cuRest = new cuRest({server:server.name});
+    server.cuRest = new cuRest({server: server.name});
 
     // Start XMPP client
     startClient(server);
