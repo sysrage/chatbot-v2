@@ -284,7 +284,6 @@ var chatCommands = [
             var targetServer = server;
         }
 
-        console.log('*** targetServer: ' + targetServer.name);
         targetServer.cuRest.getPlayers(function(data, error) {
             if (! error) {
                 var players = data;
@@ -1221,6 +1220,7 @@ function stopClient(server) {
 var client = [];
 var gameStats = [];
 var playerStats = [];
+var server = {};
 config.servers.forEach(function(server) {
     // Connect to REST API
     server.cuRest = new cuRest({server: server.name});
