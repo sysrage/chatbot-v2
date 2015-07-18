@@ -75,6 +75,7 @@ restAPI.prototype.call = function(verb, params, callback) {
         if (callback && typeof callback === "function"){
             if(error){
                 util.log("[ERROR] Unable to read API (" + verb + "): " + error);
+                console.log('serverURI: ' + serverURI);
                 callback(null, error);
             }else{
                 callback(JSON.parse(body), null);
