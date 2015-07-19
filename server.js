@@ -199,7 +199,7 @@ var SampleApp = function() {
                         getPlayerStats(server[s.name], function(ps) {
 
                             for (var i = 0; i < 10; i++) {
-                                if (! ps[i]) ps[i] = {name: 'Nobody', kills: 0, deaths: 0};
+                                if (! ps[i]) ps[i] = {playerName: 'Nobody', kills: 0, deaths: 0};
                             }
 
                             var playersSortedByKills = ps.concat().sort(function(a, b) { return b.kills - a.kills; });
