@@ -1153,7 +1153,7 @@ function startClient(server) {
                         var killerName = message.match(/^(.*) killed (.*)\.$/)[1];
                         var killedName = message.match(/^(.*) killed (.*)\.$/)[2];
 
-                        if (killerName !== killedName) {
+                        if (killerName !== killedName && typeof client[server.name].currentGame !== 'undefined') {
                             // Update killCount list
                             var existingPlayer = false;
                             for (var i = 0; i < client[server.name].currentGame.killCount.length; i++) {
