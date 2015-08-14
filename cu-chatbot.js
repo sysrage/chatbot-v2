@@ -28,12 +28,11 @@ var fs = require('fs');
 var request = require('request');
 var xmpp = require('node-xmpp');
 
+if (typeof Promise === 'undefined') Promise = require('bluebird');
+
 var cuRestAPI = require('./cu-rest.js');
 var config = require('./cu-chatbot.cfg');
 
-if (typeof Promise === 'undefined') {
-    var Promise = require('bluebird');
-}
 
 // Chat command definitions
 var commandChar = '!';
@@ -750,6 +749,7 @@ function sendiMessage(user, message) {
 
 // function to send a private message
 function sendPM(server, message, user) {
+    console.log('user: ' + user);
     client[server.name].xmpp.send(new xmpp.Element('message', { to: user, type: 'chat' }).c('body').t(message));
 }
 
@@ -1183,6 +1183,9 @@ function stopClient(server) {
         client[server.name].xmpp.removeAllListeners('stanza');
         client[server.name].xmpp.end();
         client[server.name].xmpp = undefined;
+        server.rooms.forEach(function(room) {
+            room.joined = false;
+        });
         clearInterval(client[server.name].motdTimer);
         clearInterval(client[server.name].connTimer);
         clearInterval(client[server.name].gameTimer);
