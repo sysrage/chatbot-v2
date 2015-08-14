@@ -23,8 +23,8 @@
     "npm": ">= 1.0.0"
   },
   "dependencies": {
+    "bluebird": "^2.9.34",
     "express": "~3.4.4",
-    "node-promise": "^0.5.12",
     "node-pushover": "^0.2.2",
     "node-xmpp": "^1.0.2",
     "request": "^2.58.0"

@@ -7,7 +7,7 @@ var cuRestAPI = require('./cu-rest.js');
 var config = require('./cu-chatbot.cfg');
 
 if (typeof Promise === 'undefined') {
-    var Promise = require('node-promise').Promise;
+    var Promise = require('bluebird');
 }
 
 // function to read in the saved game stats
