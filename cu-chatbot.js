@@ -131,6 +131,61 @@ var chatCommands = [
         }
     }
 },
+{ // #### MOTDPM COMMAND ####
+    command: 'motdpm',
+    help: "The command " + commandChar + "motdpm allows setting and viewing the MOTD for a server. Responses will be sent via PM.\n" +
+        "\nUsage: " + commandChar + "motdpm [server] [new MOTD]\n" +
+        "\nIf [server] is specified, all actions will apply to that server. Otherwise, they will apply to the current server.",
+    exec: function(server, room, sender, message, extras) {
+        if (extras && extras.motdadmin) {
+            var motdadmin = extras.motdadmin;
+        } else {
+            var motdadmin = false;
+        }
+
+        var params = getParams(this.command, message);
+        if (params.length > 0) {
+            var sn = params.split(' ')[0].toLowerCase();            
+            if (indexOfServer(sn) > -1) {
+                // first parameter is a server name
+                params = params.slice(sn.length + 1);
+                var targetServer = config.servers[indexOfServer(sn)];
+            } else {
+                var targetServer = server;
+            }
+        } else {
+            targetServer = server;
+        }
+
+        if (params.length > 0) {
+            room = 'pm';
+            // User is trying to set a new MOTD.
+            if (motdadmin) {
+                // User is allowed - Set new MOTD.
+                fs.writeFile(targetServer.motdFile, "MOTD: " + params, function(err) {
+                    if (err) {
+                        return util.log("[ERROR] Unable to write to MOTD file.");
+                    }
+                    targetServer.motd = "MOTD: " + params;
+                    sendReply(server, room, sender, "MOTD for " + targetServer.name + " set to: " + params);
+                    util.log("[MOTD] New MOTD for server '" + targetServer.name + "' set by user '" + sender + "'.");
+                });
+            } else {
+                // User is not allowed - Send error.
+                sendReply(server, room, sender, "You do not have permission to set an MOTD.");
+            }
+        } else {
+            // User requested current MOTD.
+            if (room === 'pm') {
+                sendPM(server, targetServer.motd.toString(), sender);
+                util.log("[MOTD] MOTD sent to user '" + sender + "' on " + server.name + ".");
+            } else {
+                sendChat(server, targetServer.motd.toString(), room);
+                util.log("[MOTD] MOTD sent to '" + server.name + '/' + room.split('@')[0] + "' per user '" + sender + "'.");
+            }
+        }
+    }
+},
 { // #### MOTDOFF COMMAND ####
     command: 'motdoff',
     help: "The command " + commandChar + "motdoff allows users to stop receiving a Message of the Day for a particular server.\n" +
