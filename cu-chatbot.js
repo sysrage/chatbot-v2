@@ -28,11 +28,10 @@ var fs = require('fs');
 var request = require('request');
 var xmpp = require('node-xmpp');
 
-if (typeof Promise === 'undefined') Promise = require('bluebird');
-
 var cuRestAPI = require('./cu-rest.js');
 var config = require('./cu-chatbot.cfg');
 
+if (typeof Promise === 'undefined') Promise = require('bluebird');
 
 // Chat command definitions
 var commandChar = '!';
@@ -136,7 +135,12 @@ var chatCommands = [
         "\nUsage: " + commandChar + "motdpm [server] [new MOTD]\n" +
         "\nIf [server] is specified, all actions will apply to that server. Otherwise, they will apply to the current server.",
     exec: function(server, room, sender, message, extras) {
-        room = 'pm'; // Always send response via PM.
+        if (room !== 'pm') {
+            // Always send response via PM.
+            room = 'pm';
+            sender = sender + '@' + server.address;
+        }
+
         if (extras && extras.motdadmin) {
             var motdadmin = extras.motdadmin;
         } else {
@@ -749,7 +753,6 @@ function sendiMessage(user, message) {
 
 // function to send a private message
 function sendPM(server, message, user) {
-    console.log('user: ' + user);
     client[server.name].xmpp.send(new xmpp.Element('message', { to: user, type: 'chat' }).c('body').t(message));
 }
 
