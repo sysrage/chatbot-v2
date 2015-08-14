@@ -24,6 +24,7 @@ var fs = require('fs');
 var request = require('request');
 var xmpp = require('node-xmpp');
 
+var Promise = require('./basic-promise.js');
 var cuRestAPI = require('./cu-rest.js');
 var config = require('./cu-chatbot.cfg');
 

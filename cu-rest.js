@@ -3,6 +3,7 @@
 
 var util = require('util');
 var request = require('request');
+var Promise = require('./basic-promise.js');
 
 var servers = [];
 

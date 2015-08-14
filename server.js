@@ -3,6 +3,7 @@
 var express = require('express');
 var fs      = require('fs');
 
+var Promise = require('./basic-promise.js');
 var cuRestAPI = require('./cu-rest.js');
 var config = require('./cu-chatbot.cfg');
 
