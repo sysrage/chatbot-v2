@@ -5,7 +5,7 @@ var util = require('util');
 var request = require('request');
 
 if (typeof Promise === 'undefined') {
-    var Promise = require('node-promise');
+    var Promise = require('node-promise').Promise;
 }
 
 var servers = [];
