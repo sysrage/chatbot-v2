@@ -137,6 +137,7 @@ var chatCommands = [
         "\nUsage: " + commandChar + "motdpm [server] [new MOTD]\n" +
         "\nIf [server] is specified, all actions will apply to that server. Otherwise, they will apply to the current server.",
     exec: function(server, room, sender, message, extras) {
+        room = 'pm'; // Always send response via PM.
         if (extras && extras.motdadmin) {
             var motdadmin = extras.motdadmin;
         } else {
@@ -158,7 +159,6 @@ var chatCommands = [
         }
 
         if (params.length > 0) {
-            room = 'pm';
             // User is trying to set a new MOTD.
             if (motdadmin) {
                 // User is allowed - Set new MOTD.
