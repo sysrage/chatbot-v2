@@ -24,9 +24,12 @@ var fs = require('fs');
 var request = require('request');
 var xmpp = require('node-xmpp');
 
-var Promise = require('./basic-promise.js');
 var cuRestAPI = require('./cu-rest.js');
 var config = require('./cu-chatbot.cfg');
+
+if (typeof Promise === 'undefined') {
+    var Promise = require('node-promise').Promise;
+}
 
 // Chat command definitions
 var commandChar = '!';

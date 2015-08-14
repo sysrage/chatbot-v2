@@ -3,7 +3,10 @@
 
 var util = require('util');
 var request = require('request');
-var Promise = require('./basic-promise.js');
+
+if (typeof Promise === 'undefined') {
+    var Promise = require('node-promise').Promise;
+}
 
 var servers = [];
 

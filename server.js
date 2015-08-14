@@ -3,11 +3,12 @@
 var express = require('express');
 var fs      = require('fs');
 
-var Promise = require('./basic-promise.js');
 var cuRestAPI = require('./cu-rest.js');
 var config = require('./cu-chatbot.cfg');
 
-
+if (typeof Promise === 'undefined') {
+    var Promise = require('node-promise').Promise;
+}
 
 // function to read in the saved game stats
 function getGameStats(server) {
