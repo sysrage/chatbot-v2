@@ -1248,6 +1248,7 @@ function startClient(server) {
                     if (sender === server.address + "/Warning") {
                         sendToAll("ADMIN NOTICE (" + server.name + "): " + message);
                         util.log("[CHAT] Server warning message sent to users. (ALL)");
+                        util.log('***** ' + stanza + ' *****');
                     }
 
                     if (cse === "cse" || isMOTDAdmin(senderName)) {
