@@ -249,78 +249,78 @@ var chatCommands = [
         }
     }
 },
-{ // #### CLIENTOFF COMMAND ####
-    command: 'clientoff',
-    help: "The command " + commandChar + "clientoff allows admins to stop the bot from connecting to a particular server.\n" +
-        "\nUsage: " + commandChar + "clientoff [server]\n" +
-        "\nIf [server] is specified, all actions will apply to that server. Otherwise, they will apply to the current server.",
-    exec: function(server, room, sender, message, extras) {
-        if (extras && extras.motdadmin) {
-            var params = getParams(this.command, message);
-            if (params.length > 0) {
-                var sn = params.split(' ')[0].toLowerCase();
-                if (indexOfServer(sn) > -1) {
-                    targetServer = config.servers[indexOfServer(sn)];
-                } else {
-                    sendReply(server, room, sender, "No server exists named '" + sn + "'.");
-                    return;
-                }
-            } else {
-                var targetServer = server;
-            }
+// { // #### CLIENTOFF COMMAND ####
+//     command: 'clientoff',
+//     help: "The command " + commandChar + "clientoff allows admins to stop the bot from connecting to a particular server.\n" +
+//         "\nUsage: " + commandChar + "clientoff [server]\n" +
+//         "\nIf [server] is specified, all actions will apply to that server. Otherwise, they will apply to the current server.",
+//     exec: function(server, room, sender, message, extras) {
+//         if (extras && extras.motdadmin) {
+//             var params = getParams(this.command, message);
+//             if (params.length > 0) {
+//                 var sn = params.split(' ')[0].toLowerCase();
+//                 if (indexOfServer(sn) > -1) {
+//                     targetServer = config.servers[indexOfServer(sn)];
+//                 } else {
+//                     sendReply(server, room, sender, "No server exists named '" + sn + "'.");
+//                     return;
+//                 }
+//             } else {
+//                 var targetServer = server;
+//             }
 
-            if (client[targetServer.name]) {
-                // Client is running - Stop it
-                stopClient(targetServer);
-                if (targetServer.name !== server.name) {
-                    sendReply(server, room, sender, "Client for " + targetServer.name + " has been stopped.");
-                }
-                util.log("[STATUS] Client for " + targetServer.name + " stopped by user '" + sender + "'.");
-            } else {
-                // Client not running - Send error
-                sendReply(server, room, sender, "No client is running for server '"+ targetServer.name + "'.");
-            }
-        } else {
-            // User is not allowed - Send error.
-            sendReply(server, room, sender, "You do not have permission to stop a client.");
-        }
-    }
-},
-{ // #### CLIENTON COMMAND ####
-    command: 'clienton',
-    help: "The command " + commandChar + "clienton allows admins to start the bot connecting to a particular server.\n" +
-        "\nUsage: " + commandChar + "clienton [server]\n" +
-        "\nIf [server] is specified, all actions will apply to that server. Otherwise, they will apply to the current server.",
-    exec: function(server, room, sender, message, extras) {
-        if (extras && extras.motdadmin) {
-            var params = getParams(this.command, message);
-            if (params.length > 0) {
-                var sn = params.split(' ')[0].toLowerCase();
-                if (indexOfServer(sn) > -1) {
-                    targetServer = config.servers[indexOfServer(sn)];
-                } else {
-                    sendReply(server, room, sender, "No server exists named '" + sn + "'.");
-                    return;
-                }
-            } else {
-                sendReply(server, room, sender, "You must specify a client to start.");
-                return;
-            }
+//             if (client[targetServer.name]) {
+//                 // Client is running - Stop it
+//                 stopClient(targetServer);
+//                 if (targetServer.name !== server.name) {
+//                     sendReply(server, room, sender, "Client for " + targetServer.name + " has been stopped.");
+//                 }
+//                 util.log("[STATUS] Client for " + targetServer.name + " stopped by user '" + sender + "'.");
+//             } else {
+//                 // Client not running - Send error
+//                 sendReply(server, room, sender, "No client is running for server '"+ targetServer.name + "'.");
+//             }
+//         } else {
+//             // User is not allowed - Send error.
+//             sendReply(server, room, sender, "You do not have permission to stop a client.");
+//         }
+//     }
+// },
+// { // #### CLIENTON COMMAND ####
+//     command: 'clienton',
+//     help: "The command " + commandChar + "clienton allows admins to start the bot connecting to a particular server.\n" +
+//         "\nUsage: " + commandChar + "clienton [server]\n" +
+//         "\nIf [server] is specified, all actions will apply to that server. Otherwise, they will apply to the current server.",
+//     exec: function(server, room, sender, message, extras) {
+//         if (extras && extras.motdadmin) {
+//             var params = getParams(this.command, message);
+//             if (params.length > 0) {
+//                 var sn = params.split(' ')[0].toLowerCase();
+//                 if (indexOfServer(sn) > -1) {
+//                     targetServer = config.servers[indexOfServer(sn)];
+//                 } else {
+//                     sendReply(server, room, sender, "No server exists named '" + sn + "'.");
+//                     return;
+//                 }
+//             } else {
+//                 sendReply(server, room, sender, "You must specify a client to start.");
+//                 return;
+//             }
 
-            if (client[targetServer.name]) {
-                // Client is already running - Send error
-                sendReply(server, room, sender, "A client for " + targetServer.name + " is already running.");
-            } else {
-                startClient(targetServer);
-                sendReply(server, room, sender, "A client for " + targetServer.name + " has been started.");
-                util.log("[STATUS] Client for " + targetServer.name + " started by user '" + sender + "'.");
-            }
-        } else {
-            // User is not allowed - Send error.
-            sendReply(server, room, sender, "You do not have permission to stop a client.");
-        }
-    }
-},
+//             if (client[targetServer.name]) {
+//                 // Client is already running - Send error
+//                 sendReply(server, room, sender, "A client for " + targetServer.name + " is already running.");
+//             } else {
+//                 startClient(targetServer);
+//                 sendReply(server, room, sender, "A client for " + targetServer.name + " has been started.");
+//                 util.log("[STATUS] Client for " + targetServer.name + " started by user '" + sender + "'.");
+//             }
+//         } else {
+//             // User is not allowed - Send error.
+//             sendReply(server, room, sender, "You do not have permission to stop a client.");
+//         }
+//     }
+// },
 { // #### PLAYERS COMMAND ####
     command: 'players',
     help: "The command " + commandChar + "players displays current players on a server.\n" +
@@ -856,8 +856,7 @@ function checkLastStanza(server) {
     if (epochTime - server.lastStanza > 65) {
         util.log("[ERROR] No stanza for 65 seconds on " + server.name + ". Reconnecting...");
         server.lastStanza = epochTime;
-        stopClient(server);
-        startClient(server);
+        restartClient(server);
     }
 }
 
@@ -865,22 +864,27 @@ function checkLastStanza(server) {
 var timerControlGame = function(server) { return setInterval(function() {controlGame(server); }, 30000); };
 function controlGame(server) {
     var epochTime = Math.floor((new Date).getTime() / 1000);
-    if (typeof client[server.name] === 'undefined') return;
-    if (typeof client[server.name].currentGame === 'undefined') {
+    if (typeof server.currentGame === 'undefined') {
         // Timer just started, perform initialization
-        client[server.name].currentGame = { startTime: 0, ended: true, artScore: 0, tuaScore: 0, vikScore: 0 };
-        client[server.name].lastBegTime = epochTime;
-        client[server.name].downCount = 0;
+        server.currentGame = { 
+            startTime: 0,
+            ended: true,
+            artScore: 0,
+            tuaScore: 0,
+            vikScore: 0,
+            downCount: 0,
+            lastBegTime: epochTime
+        };
     }
 
     // Check to make sure game server is up. If not, skip this iteration of the timer.
     isGameServerUp(server, function(up) {
         if (! up) {
-            client[server.name].downCount++;
-            if (client[server.name].downCount > 2 && ! client[server.name].currentGame.ended) client[server.name].currentGame.ended = true;
+            server.currentGame.downCount++;
+            if (server.currentGame.downCount > 2 && ! server.currentGame.ended) server.currentGame.ended = true;
             return;
         } else {
-            client[server.name].downCount = 0;
+            server.currentGame.downCount = 0;
             // Poll API for latest control game data.
             server.cuRest.getControlGame().then(function(cgData) {
                 server.cuRest.getPlayers().then(function(pData) {
@@ -897,7 +901,7 @@ function controlGame(server) {
                     var vikCount = pData.vikings;
                     var totalPlayers = pData.arthurians + pData.tuathaDeDanann + pData.vikings;
 
-                    if ((gameState === 1) && ! client[server.name].currentGame.ended) {
+                    if ((gameState === 1) && ! server.currentGame.ended) {
                         // Game we were monitoring has ended. Save stats.
                         util.log("[GAME] A round has ended on " + server.name + " (" + gameStats[server.name].gameNumber + ").");
                         gameStats[server.name].gameNumber++;
@@ -938,7 +942,7 @@ function controlGame(server) {
                             }
                         }
 
-                        gameStats[server.name].lastStartTime = client[server.name].currentGame.startTime;
+                        gameStats[server.name].lastStartTime = server.currentGame.startTime;
 
                         // Write gameStats to disk
                         fs.writeFile(server.gameFile, JSON.stringify(gameStats[server.name]), function(err) {
@@ -948,8 +952,8 @@ function controlGame(server) {
                         });
 
                         // Add new entries to playerStats based on kills API
-                        roundStartTime = new Date(client[server.name].currentGame.startTime * 1000).toISOString();
-                        // roundEndTime = new Date((client[server.name].currentGame.startTime + server.roundTime) * 1000).toISOString();
+                        roundStartTime = new Date(server.currentGame.startTime * 1000).toISOString();
+                        // roundEndTime = new Date((server.currentGame.startTime + server.roundTime) * 1000).toISOString();
                         roundEndTime = '';
                         getRoundKills(server, roundStartTime, roundEndTime, 0, function(roundKills) {
                             var playersInRound = [];
@@ -1013,33 +1017,35 @@ function controlGame(server) {
                                 }
                             });
 
-                            client[server.name].currentGame.ended = true;
+                            server.currentGame.ended = true;
                             util.log("[GAME] Game and player statistics saved for last round.");
                         });
                     }
 
-                    if ((gameState === 2 || gameState === 3) && client[server.name].currentGame.ended) {
+                    if ((gameState === 2 || gameState === 3) && server.currentGame.ended) {
                         // New game has started
-                        client[server.name].currentGame = {
+                        server.currentGame = { 
                             startTime: epochTime - (server.roundTime - timeLeft),
                             ended: false,
                             artScore: artScore,
                             tuaScore: tuaScore,
-                            vikScore: vikScore
-                        }
+                            vikScore: vikScore,
+                            downCount: 0,
+                            lastBegTime: epochTime
+                        };
 
                         util.log("[GAME] A new round has started on " + server.name + " (" + (gameStats[server.name].gameNumber + 1) + ").");
                     }
 
                     // Beg for users to join the game.
-                    // if ((gameState === 1) && ((epochTime - gameStats[server.name].lastStartTime) > 3600) && ((epochTime - client[server.name].lastBegTime) > 3600) && (totalPlayers > 0)) {
+                    // if ((gameState === 1) && ((epochTime - gameStats[server.name].lastStartTime) > 3600) && ((epochTime - server.currentGame.lastBegTime) > 3600) && (totalPlayers > 0)) {
                     //     // Game hasn't started for over an hour, we haven't sent a beg notice for an hour, and at least 1 player is in game
                     //     server.rooms.forEach(function(r) {
                     //         if (r.announce === true) {
                     //             sendChat(server, "Players are waiting for a new round to begin on " + server.name + ". Join the battle!", r.name + "@" + server.service + "." + server.address);
                     //         }
                     //     });
-                    //     client[server.name].lastBegTime = epochTime;
+                    //     server.currentGame.lastBegTime = epochTime;
                     // }
                 });
             });
@@ -1132,12 +1138,10 @@ function startClient(server) {
                 // Start sending MOTDs
                 client[server.name].motdTimer = timerMOTD(server);
 
-                // Start verifying connectivity
+                // Start verifying client is still receiving stanzas
                 server.lastStanza = Math.floor((new Date).getTime() / 1000);
                 client[server.name].connTimer = timerConnected(server);
 
-                // Start watching Control Game
-                client[server.name].gameTimer = timerControlGame(server);
             });
 
             // Parse each stanza from the XMPP server
@@ -1308,9 +1312,14 @@ function stopClient(server) {
         });
         clearInterval(client[server.name].motdTimer);
         clearInterval(client[server.name].connTimer);
-        clearInterval(client[server.name].gameTimer);
         client[server.name] = undefined;
     }
+}
+
+// function to restart a client for a particular server
+function restartClient(server) {
+    stopClient(server);
+    startClient(server);
 }
 
 // Initial startup
@@ -1327,6 +1336,9 @@ config.servers.forEach(function(server) {
     getGameStats(server);
     getPlayerStats(server);
     server.motdReceivers = [];
+
+    // Start watching Control Game
+    server.gameTimer = timerControlGame(server);
 
     // Start XMPP client
     startClient(server);
