@@ -78,7 +78,7 @@ var chatCommands = [
     help: "The command " + commandChar + "confirmed displays information about confirmed functionality.\n" +
         "\n" + "Usage: " + commandChar + "confirmed", 
     exec: function(server, room, sender, message, extras) {
-        sendReply(server, room, sender, "http://friarsboon.com/wp-content/uploads/everythingconfirmed.gif");
+        sendReply(server, room, sender, "http://ft.trillian.im/af0f242d455e9f185639905ece7a631f656553c6/6AZkvU0ukO6wr5Gaqil7C2hmOqy6H.gif");
     }
 },
 { // #### TEAMSPEAK COMMAND ####
