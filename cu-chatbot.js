@@ -359,7 +359,34 @@ var chatCommands = [
         }
 
         targetServer.cuRest.getPlayers().then(function(players) {
+            switch(onlineStats[targetServer.name].accessLevel) {
+                case 0:
+                    var accessLevel = "Public";
+                    break;
+                case 1:
+                    var accessLevel = "Beta 3";
+                    break;
+                case 2:
+                    var accessLevel = "Beta 2";
+                    break;
+                case 3:
+                    var accessLevel = "Beta 1";
+                    break;
+                case 4:
+                    var accessLevel = "Alpha";
+                    break;
+                case 5:
+                    var accessLevel = "IT";
+                    break;
+                case 6:
+                    var accessLevel = "Development";
+                    break;
+                default:
+                    var accessLevel = "Unknown";
+            }
+
             var totalPlayers = players.arthurians + players.tuathaDeDanann + players.vikings;
+            sendReply(server, room, sender, "Allowed player type on " + targetServer.name + ": " + accessLevel);
             sendReply(server, room, sender, "There are currently " + totalPlayers + " players logged in to " + targetServer.name + ":" +
                 "\n   Arthurians: " + players.arthurians +
                 "\n   TuathaDeDanann: " + players.tuathaDeDanann +
