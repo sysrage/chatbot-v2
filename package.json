@@ -23,6 +23,7 @@
     "npm": ">= 1.0.0"
   },
   "dependencies": {
+    "aws-sdk": "^2.1.47",
     "bluebird": "^2.9.34",
     "express": "~3.4.4",
     "node-pushover": "^0.2.2",
