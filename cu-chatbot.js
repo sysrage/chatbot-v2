@@ -753,25 +753,27 @@ function getRoundKills(server, start, end, attempt, callback) {
     var roundKills = [];
     server.cuRest.getKills({start: start, end: end}).then(function(data) {
         data.forEach(function(killEntry) {
-            var killerName = killEntry.killer.name;
-            var killerFaction = killEntry.killer.faction;
-            var killerRace = killEntry.killer.race;
-            var killerType = killEntry.killer.archetype;
-            var victimName = killEntry.victim.name;
-            var victimFaction = killEntry.victim.faction;
-            var victimRace = killEntry.victim.race;
-            var victimType = killEntry.victim.archetype;
+            if (killEntry.killer && killEntry.victim) {
+                var killerName = killEntry.killer.name;
+                var killerFaction = killEntry.killer.faction;
+                var killerRace = killEntry.killer.race;
+                var killerType = killEntry.killer.archetype;
+                var victimName = killEntry.victim.name;
+                var victimFaction = killEntry.victim.faction;
+                var victimRace = killEntry.victim.race;
+                var victimType = killEntry.victim.archetype;
 
-            roundKills.push({
-                killerName: killerName, 
-                killerFaction: killerFaction,
-                killerRace: killerRace,
-                killerType: killerType,
-                victimName: victimName,
-                victimFaction: victimFaction,
-                victimRace: victimRace,
-                victimType: victimType
-            });
+                roundKills.push({
+                    killerName: killerName, 
+                    killerFaction: killerFaction,
+                    killerRace: killerRace,
+                    killerType: killerType,
+                    victimName: victimName,
+                    victimFaction: victimFaction,
+                    victimRace: victimRace,
+                    victimType: victimType
+                });
+            }
         });
         callback(roundKills);
     }, function(error) {
