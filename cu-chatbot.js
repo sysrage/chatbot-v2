@@ -124,6 +124,8 @@ var chatCommands = [
         sendReply(server, room, sender, "Quick Tips: Press V to create new spells/abilities || Press B to open spellbook to delete spells/abilities || Type '/hideui perfhud' to hide the statistics window || Type '/suicide' to quickly spawn in a new location");
         sendReply(server, room, sender, "To help increase performance on older systems type 'shadowMaxDist 0', hold Shift, and press Enter.");
         sendReply(server, room, sender, "To run the game in full screen at higher resolution hold Alt while clicking the 'Play' button on the launcher and enter 'windowWidth=1920; windowHeight=1080'.");
+        sendReply(server, room, sender, "If you have poor performance on a laptop which contains both integrated and descrete video cards, see this post: http://bit.ly/1JmKCUR");
+        sendReply(server, room, sender, "If something crashes when you do it, don't do it. -Tim");
         sendReply(server, room, sender, "For other very useful information, please click the 'Alpha Manual' link on the game patcher.");
     }
 },
