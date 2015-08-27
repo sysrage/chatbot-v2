@@ -559,6 +559,13 @@ var chatCommands = [
         }
 
         var pStats = playerStats[targetServer.name].concat();
+
+        // Remove bots from rankings
+        for (var i = 0; i < pStats.length; i++) {
+            if (['SuperFireBot','SuperWaterBot','SuperEarthBot'].indexOf(pStats[i].playerName) > -1) pStats.splice(i, 1);
+        }
+
+        // Ensure at least 10 entries exist. Create dummy entries if not.
         for (var i = 0; i < 10; i++) {
             if (! pStats[i]) pStats[i] = {
                 playerName: 'Nobody',
