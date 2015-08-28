@@ -108,7 +108,7 @@ var SampleApp = function() {
             //  Log errors on OpenShift but continue w/ 127.0.0.1 - this
             //  allows us to run/test the app locally.
             console.warn('No OPENSHIFT_NODEJS_IP var, using 127.0.0.1');
-            // self.ipaddress = "127.0.0.1";
+            self.ipaddress = "127.0.0.1";
             // self.ipaddress = "192.168.1.101";
 
         };
@@ -282,10 +282,7 @@ var SampleApp = function() {
 
                     // Remove bots from rankings.
                     for (var i = 0; i < data.length; i++) {
-                        if ( data[i].playerName === 'SuperFireBot' ) data.splice(i, 1);
-                        if ( data[i].playerName === 'SuperEarthBot' ) data.splice(i, 1);
-                        if ( data[i].playerName === 'SuperWaterBot' ) data.splice(i, 1);
-                        // if (['SuperFireBot','SuperWaterBot','SuperEarthBot'].indexOf(data[i].playerName) > -1) data.splice(i, 1);
+                        if (['SuperFireBot','SuperWaterBot','SuperEarthBot'].indexOf(data[i].playerName) > -1) data.splice(i, 1);
                     }
 
                     // Ensure at least 10 entries exist. Create dummy entries if not.
