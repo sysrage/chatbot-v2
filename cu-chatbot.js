@@ -565,13 +565,17 @@ var chatCommands = [
 
         var pStats = playerStats[targetServer.name].concat();
 
+        var i = 0;
+        pStats.forEach(function(entry) {
+            console.log(i + '= \'' + entry.PlayerName + '\'');
+        });
         // Remove bots from rankings
-        for (var i = 0; i < pStats.length; i++) {
-            console.log(i + "= '" + pStats[i].playerName + "'");
-            console.log('length = ' + playerStats[targetServer.name].length);
-            console.log('num = ' + num);
-            if (['SuperFireBot','SuperWaterBot','SuperEarthBot'].indexOf(pStats[i].playerName) > -1) pStats.splice(i, 1);
-        }
+        // for (var i = 0; i < pStats.length; i++) {
+        //     console.log(i + "= '" + pStats[i].playerName + "'");
+        //     console.log('length = ' + playerStats[targetServer.name].length);
+        //     console.log('num = ' + num);
+        //     if (['SuperFireBot','SuperWaterBot','SuperEarthBot'].indexOf(pStats[i].playerName) > -1) pStats.splice(i, 1);
+        // }
 
         // Ensure at least 10 entries exist. Create dummy entries if not.
         for (var i = 0; i < 10; i++) {
