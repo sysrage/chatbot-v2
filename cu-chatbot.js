@@ -570,7 +570,10 @@ var chatCommands = [
 
         // Remove bots from rankings
         for (var i = 0; i < pStats.length; i++) {
-            if (['SuperFireBot','SuperWaterBot','SuperEarthBot'].indexOf(pStats[i].playerName) > -1) pStats.splice(i, 1);
+            if (['SuperFireBot','SuperWaterBot','SuperEarthBot'].indexOf(pStats[i].playerName) > -1) {
+                pStats.splice(i, 1);
+                i--;
+            }
         }
 
         // Ensure at least 10 entries exist. Create dummy entries if not.
