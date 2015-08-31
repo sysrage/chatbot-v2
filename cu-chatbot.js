@@ -609,13 +609,13 @@ var chatCommands = [
         var playersSortedByDeaths = pStats.concat().sort(function(a, b) { return b.deaths - a.deaths; });
 
         sendReply(server, room, sender, "Current Leaderbord for " + targetServer.name + " - Kills:" +
-            "\n   #1 " + playersSortedByKills[0].playerName + ' (' + playersSortedByKills[0].playerRace + ') - ' + playersSortedByKills[0].kills + ' (' + (playersSortedByKills[0].kills / playersSortedByKills[0].gamesPlayed).toFixed(2) + ' kills per game)' +
-            "\n   #2 " + playersSortedByKills[1].playerName + ' (' + playersSortedByKills[1].playerRace + ') - ' + playersSortedByKills[1].kills + ' (' + (playersSortedByKills[1].kills / playersSortedByKills[1].gamesPlayed).toFixed(2) + ' kills per game)' +
-            "\n   #3 " + playersSortedByKills[2].playerName + ' (' + playersSortedByKills[2].playerRace + ') - ' + playersSortedByKills[2].kills + ' (' + (playersSortedByKills[2].kills / playersSortedByKills[2].gamesPlayed).toFixed(2) + ' kills per game)');
+            "\n   #1 " + playersSortedByKills[0].playerName + ' (' + playersSortedByKills[0].playerRace + ') - ' + playersSortedByKills[0].kills +
+            "\n   #2 " + playersSortedByKills[1].playerName + ' (' + playersSortedByKills[1].playerRace + ') - ' + playersSortedByKills[1].kills +
+            "\n   #3 " + playersSortedByKills[2].playerName + ' (' + playersSortedByKills[2].playerRace + ') - ' + playersSortedByKills[2].kills);
         sendReply(server, room, sender, "Current Leaderbord for " + targetServer.name + " - Deaths:" +
-            "\n   #1 " + playersSortedByDeaths[0].playerName + ' (' + playersSortedByDeaths[0].playerRace + ') - ' + playersSortedByDeaths[0].deaths + ' (' + (playersSortedByDeaths[0].deaths / playersSortedByDeaths[0].gamesPlayed).toFixed(2) + ' deaths per game)' +
-            "\n   #2 " + playersSortedByDeaths[1].playerName + ' (' + playersSortedByDeaths[1].playerRace + ') - ' + playersSortedByDeaths[1].deaths + ' (' + (playersSortedByDeaths[1].deaths / playersSortedByDeaths[1].gamesPlayed).toFixed(2) + ' deaths per game)' +
-            "\n   #3 " + playersSortedByDeaths[2].playerName + ' (' + playersSortedByDeaths[2].playerRace + ') - ' + playersSortedByDeaths[2].deaths + ' (' + (playersSortedByDeaths[2].deaths / playersSortedByDeaths[2].gamesPlayed).toFixed(2) + ' deaths per game)');
+            "\n   #1 " + playersSortedByDeaths[0].playerName + ' (' + playersSortedByDeaths[0].playerRace + ') - ' + playersSortedByDeaths[0].deaths +
+            "\n   #2 " + playersSortedByDeaths[1].playerName + ' (' + playersSortedByDeaths[1].playerRace + ') - ' + playersSortedByDeaths[1].deaths +
+            "\n   #3 " + playersSortedByDeaths[2].playerName + ' (' + playersSortedByDeaths[2].playerRace + ') - ' + playersSortedByDeaths[2].deaths);
         sendReply(server, room, sender, "Top 10 (and more): http://chatbot-sysrage.rhcloud.com");
     }
 },
