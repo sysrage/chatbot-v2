@@ -1,6 +1,6 @@
 /* Camelot Unchained XMPP bot using Node.js
 
-To use, run `node cu-chat-bot.js`
+To use, run `node cu-chatbot.js`
 
 Requires:
  - Node.js 11.x
@@ -26,6 +26,7 @@ var sys = require('sys');
 var util = require('util');
 var path = require('path');
 var fs = require('fs');
+var moment = require('moment');
 var request = require('request');
 var xmpp = require('node-xmpp');
 
@@ -56,101 +57,296 @@ var chatCommands = [
         }
     }
 },
+{ // #### BACON COMMAND ####
+    command: 'bacon',
+    help: "The command " + commandChar + "bacon displays information about bacon.\n" +
+        "\nUsage: " + commandChar + "bacon", 
+    exec: function(server, room, sender, message, extras) {
+        sendReply(server, room, sender, "http://ft.trillian.im/2bdaf99da85722bb4ec225c39b393404d0afcfd9/6B5pYQdHc32HYGlIrmutnpu4hDY21.jpg");
+    }
+},
+{ // #### BLOCKS COMMAND ####
+    command: 'blocks',
+    help: "The command " + commandChar + "blocks displays the total number of blocks placed within CUBE.\n" +
+        "\nUsage: " + commandChar + "blocks", 
+    exec: function(server, room, sender, message, extras) {
+        getCUBECount(function (cubeCount) {
+            sendReply(server, room, sender, "Players have placed a total of " + cubeCount + " blocks within the world.");
+        });
+    }
+},
 { // #### BOTINFO COMMAND ####
     command: 'botinfo',
     help: "The command " + commandChar + "botinfo displays information about this chatbot.\n" +
-        "\n" + "Usage: " + commandChar + "botinfo", 
+        "\nUsage: " + commandChar + "botinfo", 
     exec: function(server, room, sender, message, extras) {
         sendReply(server, room, sender, "The bot is written in Node.js and is running on an OpenShift gear. Source code for the bot can be found here: https://github.com/sysrage/cu-chatbot" +
             "\n\nMuch thanks to the CU Mod Squad for their help.");
     }
 },
-{ // #### FRIAR COMMAND ####
-    command: 'friar',
-    help: "The command " + commandChar + "friar displays information about friars.\n" +
-        "\n" + "Usage: " + commandChar + "friar", 
+{ // #### CHATLOG COMMAND ####
+    command: 'chatlog',
+    help: "The command " + commandChar + "chatlog sends a private message with logged chat messages from a monitored room.\n" +
+        "\nUsage: " + commandChar + "chatlog <parameters>\n" +
+        "\nAvailable Parameters:" +
+        "\n  -h <number> = Specify the number of hours to include in displayed results (maximum of " + config.chatlogLimit + ")" +
+        "\n  -m <number> = Specify the number of minutes to include in displayed results (maximum of " + (config.chatlogLimit * 60) + ")" +
+        "\n  -r <room> = Specify the chat room to include in displayed results" +
+        "\n  -u <user> = Specify the user name to include in displayed results" +
+        "\n  -t <text> = Specify the message text to include in displayed results (regular expressions allowed)",
     exec: function(server, room, sender, message, extras) {
-        sendReply(server, room, sender, "Out of the frying pan, into the friar. It has been confirmed that there will be frying in the game." +
-            "\n\nUnfortunately for Friarjon, the type of frying is still unknown. Get your Monkfish ready!");
-    }
-},
-{ // #### BACON COMMAND ####
-    command: 'bacon',
-    help: "The command " + commandChar + "bacon displays information about bacon.\n" +
-        "\n" + "Usage: " + commandChar + "bacon", 
-    exec: function(server, room, sender, message, extras) {
-        sendReply(server, room, sender, "http://ft.trillian.im/2bdaf99da85722bb4ec225c39b393404d0afcfd9/6B5pYQdHc32HYGlIrmutnpu4hDY21.jpg");
+        var curISODate = new Date().toISOString();
+        var searchRoom = null;
+        var searchHours = null;
+        var searchMins = null;
+        var searchUser = null;
+        var searchText = null;
+
+        // Parse parameters passed to command
+        var params = getParams(this.command, message);
+        if (params.length > 0) {
+            var paramArray = params.split(' ');
+            for (var i = 0; i < paramArray.length; i++) {
+                switch(paramArray[i]) {
+                    case '-r':
+                        // verify next param is a monitored room then set room to search
+                        var validRoom = false;
+                        server.rooms.forEach(function(room){
+                            if (room.name === paramArray[i + 1]) validRoom = true;
+                        });
+                        if (validRoom) {
+                            searchRoom = paramArray[i + 1];
+                            i++;
+                        } else {
+                            sendReply(server, room, sender, "The room '" + paramArray[i + 1] + "' is not being logged.");
+                            return;
+                        }
+                        break;
+                    case '-h':
+                        // verify next param is a positive integer then set hours to search
+                        if (paramArray[i + 1] % 1 !== 0 || paramArray[i + 1] < 1) {
+                            sendReply(server, room, sender, "The value following '-h' must be a positive number.");
+                            return;
+                        }
+                        searchHours = parseInt(paramArray[i + 1]);
+                        i++;
+                        break;
+                    case '-m':
+                        // verify next param is a positive integer then set mins to search
+                        if (paramArray[i + 1] % 1 !== 0 || paramArray[i + 1] < 1) {
+                            sendReply(server, room, sender, "The value following '-m' must be a positive number.");
+                            return;
+                        }
+                        searchMins = parseInt(paramArray[i + 1]);
+                        i++;
+                        break;
+                    case '-u':
+                        // verify next param is a word then set user to search
+                        if (paramArray[i + 1].search(/^[^\-]+/) === -1) {
+                            sendReply(server, room, sender, "The value following '-u' must be a user name.");
+                            return;
+                        }
+                        searchUser = paramArray[i + 1];
+                        i++;
+                        break;
+                    case '-t':
+                        // verify next param exists, then combine all params up to next - or end
+                        if (paramArray[i + 1].search(/^[^\-]+/) === -1) {
+                            sendReply(server, room, sender, "The value following '-t' must be text to search for.");
+                            return;
+                        }
+                        var sTxt = "";
+                        for (var t = i + 1; t < paramArray.length; t++) {
+                            if (paramArray[t].search(/^[^\-]+/) !== -1) {
+                                if (sTxt.length > 0) sTxt += " ";
+                                sTxt += paramArray[t];
+                            } else {
+                                break;
+                            }
+                        }
+                        searchText = sTxt;
+                        break;
+                    default:
+                        // Allow ##h and ##m for hours and minutes
+                        if (paramArray[i].search(/[0-9]+[Hh]/) !== -1) searchHours = parseInt(paramArray[i]);
+                        if (paramArray[i].search(/[0-9]+[Mm]/) !== -1) searchMins = parseInt(paramArray[i]);
+                        break;
+                }
+            }
+        } else {
+            sendReply(server, room, sender, "Please specify a filter to limit the number of messages displayed. Type `" + commandChar + "help chatlog` for more information.");
+            return;
+        }
+
+        if (! searchHours && ! searchMins) searchHours = config.chatlogLimit;
+
+        if (searchHours && searchMins) {
+            searchMins += searchHours * 60;
+            searchHours = null;
+        }
+
+        if (room === 'pm') {
+            if (searchRoom) {
+                var roomName = searchRoom;
+            } else {
+                sendReply(server, room, sender, "You must specify a room to search with the '-r' parameter.");
+                return;
+            }
+        } else {
+            if (searchRoom) {
+                var roomName = searchRoom;
+            } else {
+                var roomName = room.split('@')[0];
+            }
+            room = 'pm';
+            sender = sender + '@' + server.address;
+        }
+
+        if (! server.chatlog[roomName]) {
+            sendReply(server, room, sender, "No logs are currently saved for the room '" + roomName + "'.");
+            return;
+        }
+
+        var logResults = "Chat history with filter '";
+        if (searchHours) logResults += "hours:" + searchHours + " ";
+        if (searchMins) logResults += "mins:" + searchMins + " ";
+        if (searchUser) logResults += "user:" + searchUser + " ";
+        if (searchText) logResults += "text:" + searchText + " ";
+        logResults += "room: " + roomName + "':";
+
+        var matchingChat = [];
+        for (var i = 0; i < server.chatlog[roomName].length; i++) {
+            if (searchHours) {
+                if (moment(curISODate).diff(server.chatlog[roomName][i].timestamp, "hours") < searchHours) matchingChat.push(server.chatlog[roomName][i]);
+            }
+            if (searchMins) {
+                if (moment(curISODate).diff(server.chatlog[roomName][i].timestamp, "minutes") < searchMins) matchingChat.push(server.chatlog[roomName][i]);
+            }
+        }
+        matchingChat.forEach(function(msg) {
+            var isMatch = true;
+            if (searchUser && msg.sender !== searchUser) isMatch = false;
+            if (searchText && msg.message.search(new RegExp(searchText)) === -1) isMatch = false;
+
+            if (isMatch) logResults += "\n   [" + moment(msg.timestamp).format("HH:mm") + "] <" + msg.sender + "> " + msg.message;
+        });
+        sendReply(server, room, sender, logResults);
     }
 },
 { // #### CONFIRMED COMMAND ####
     command: 'confirmed',
     help: "The command " + commandChar + "confirmed displays information about confirmed functionality.\n" +
-        "\n" + "Usage: " + commandChar + "confirmed", 
+        "\nUsage: " + commandChar + "confirmed", 
     exec: function(server, room, sender, message, extras) {
         sendReply(server, room, sender, "http://ft.trillian.im/af0f242d455e9f185639905ece7a631f656553c6/6AZkvU0ukO6wr5Gaqil7C2hmOqy6H.gif");
     }
 },
-{ // #### TEAMSPEAK COMMAND ####
-    command: 'teamspeak',
-    help: "The command " + commandChar + "teamspeak displays information about the community Teamspeak server.\n" +
-        "\n" + "Usage: " + commandChar + "teamspeak", 
+{ // #### EVENTS COMMAND ####
+    command: 'events',
+    help: "The command " + commandChar + "events displays scheduled events for a server.\n" +
+        "\nUsage: " + commandChar + "events [server]\n" +
+        "\nIf [server] is specified, all actions will apply to that server. Otherwise, they will apply to the current server.",
     exec: function(server, room, sender, message, extras) {
-        sendReply(server, room, sender, "Community member Xirrin has been kind enough to provide a Teamspeak server. This can be used for voice" +
-            "chat during CU test events. Request access to the appropriate channels via _global chat or a PM on the forums." +
-            "\n\nTeamspeak Server: oppositionunchained.com (default port)");
+        var params = getParams(this.command, message);
+        if (params.length > 0) {
+            var sn = params.split(' ')[0].toLowerCase();
+            if (indexOfServer(sn) > -1) {
+                targetServer = config.servers[indexOfServer(sn)];
+            } else {
+                sendReply(server, room, sender, "No server exists named '" + sn + "'.");
+                return;
+            }
+        } else {
+            var targetServer = server;
+        }
+
+        sendReply(server, room, sender, "Calendar showing upcomming events: http://bit.ly/1PopbEY");
+
+        targetServer.cuRest.getEvents().then(function(data) {
+            if (data.length < 1) {
+                sendReply(server, room, sender, "There are currently no events scheduled for " + targetServer.name + ".");
+            } else {
+                data.forEach(function(e) {
+                    util.log(e);
+                    // WAT??? Need CSE to add an event to know what happens here.
+                });
+            }
+        }, function(error) {
+            sendReply(server, room, sender, "Error accessing API. Server may be down.");
+        });
     }
 },
 { // #### FPS COMMAND ####
     command: 'fps',
     help: "The command " + commandChar + "fps displays information about increasing frame rate.\n" +
-        "\n" + "Usage: " + commandChar + "fps", 
+        "\nUsage: " + commandChar + "fps", 
     exec: function(server, room, sender, message, extras) {
         sendReply(server, room, sender, "If you are having issues with low FPS, please see this pinned post in the bug #4 forum on how to change your active GPU: http://bit.ly/1JmKCUR");
     }
 },
-{ // #### TOS COMMAND ####
-    command: 'tos',
-    help: "The command " + commandChar + "tos displays a link to the Terms Of Service forum thread.\n" +
-        "\n" + "Usage: " + commandChar + "tos", 
+{ // #### FRIAR COMMAND ####
+    command: 'friar',
+    help: "The command " + commandChar + "friar displays information about friars.\n" +
+        "\nUsage: " + commandChar + "friar", 
     exec: function(server, room, sender, message, extras) {
-        sendReply(server, room, sender, "Be sure to carefully read and abide by the Terms Of Service found here: http://bit.ly/1fLZ5Pk");
+        sendReply(server, room, sender, "Out of the frying pan, into the friar. It has been confirmed that there will be frying in the game." +
+            "\n\nUnfortunately for Friarjon, the type of frying is still unknown. Get your Monkfish ready!");
     }
 },
-{ // #### TIPS COMMAND ####
-    command: 'tips',
-    help: "The command " + commandChar + "tips displays tips for new Camelot Unchained users.\n" +
-        "\n" + "Usage: " + commandChar + "tips [user]\n" +
-        "\nIf [user] is specified, tips will be sent to that user. If 'chat' is specified as the user, tips will be sent to chat.", 
+{ // #### LEADERBOARD COMMAND ####
+    command: 'leaderboard',
+    help: "The command " + commandChar + "leaderboard displays players with the most kills/deaths.\n" +
+        "\nUsage: " + commandChar + "leaderboard [server]\n" +
+        "\nIf [server] is specified, all actions will apply to that server. Otherwise, they will apply to the current server.",
     exec: function(server, room, sender, message, extras) {
         var params = getParams(this.command, message);
         if (params.length > 0) {
-            var pn = params.split(' ')[0].toLowerCase();
-            if (pn !== 'chat') {
-                if (room === 'pm') {
-                    // Only allow tips requested via PM to be sent to requester to avoid abuse
-                    sendReply(server, room, sender, "Tips sent to " + sender.split("@")[0] + ".");
-                } else {
-                    // send message as PM to specified user
-                    sendReply(server, room, sender, "Tips sent to " + pn + ".");
-                    room = 'pm';
-                    sender = pn + '@' + server.address;
-                }
+            var sn = params.split(' ')[0].toLowerCase();
+            if (indexOfServer(sn) > -1) {
+                targetServer = config.servers[indexOfServer(sn)];
+            } else {
+                sendReply(server, room, sender, "No server exists named '" + sn + "'.");
+                return;
             }
         } else {
-            // send message as PM to user calling !tips
-            sendReply(server, room, sender, "Tips sent to " + sender.split("@")[0] + ".");
-            if (room !== 'pm') {
-                room = 'pm';
-                sender = sender + '@' + server.address;               
+            var targetServer = server;
+        }
+
+        var pStats = playerStats[targetServer.name].concat();
+
+        // Remove bots from rankings
+        for (var i = 0; i < pStats.length; i++) {
+            if (['SuperFireBot','SuperWaterBot','SuperEarthBot'].indexOf(pStats[i].playerName) > -1) {
+                pStats.splice(i, 1);
+                i--;
             }
         }
 
-        sendReply(server, room, sender, "Quick Tips: Press V to create new spells/abilities || Press B to open spellbook to delete spells/abilities || Type '/hideui perfhud' to hide the statistics window || Type '/suicide' to quickly spawn in a new location");
-        sendReply(server, room, sender, "To help increase performance on older systems type 'shadowMaxDist 0', hold Shift, and press Enter.");
-        sendReply(server, room, sender, "To run the game in full screen at higher resolution hold Alt while clicking the 'Play' button on the launcher and enter 'windowWidth=1920; windowHeight=1080'.");
-        sendReply(server, room, sender, "If you have poor performance on a laptop which contains both integrated and descrete video cards, see this post: http://bit.ly/1JmKCUR");
-        sendReply(server, room, sender, "If something crashes when you do it, don't do it. -Tim");
-        sendReply(server, room, sender, "For other very useful information, please click the 'Alpha Manual' link on the game patcher.");
+        // Ensure at least 10 entries exist. Create dummy entries if not.
+        for (var i = 0; i < 10; i++) {
+            if (! pStats[i]) pStats[i] = {
+                playerName: 'Nobody',
+                playerFaction: 'None',
+                playerRace: 'None',
+                playerType: 'None',
+                kills: 0,
+                deaths: 0,
+                gamesPlayed: 0
+            };
+        }
+
+        var playersSortedByKills = pStats.concat().sort(function(a, b) { return b.kills - a.kills; });
+        var playersSortedByDeaths = pStats.concat().sort(function(a, b) { return b.deaths - a.deaths; });
+
+        sendReply(server, room, sender, "Current Leaderbord for " + targetServer.name + " - Kills:" +
+            "\n   #1 " + playersSortedByKills[0].playerName + ' (' + playersSortedByKills[0].playerRace + ') - ' + playersSortedByKills[0].kills +
+            "\n   #2 " + playersSortedByKills[1].playerName + ' (' + playersSortedByKills[1].playerRace + ') - ' + playersSortedByKills[1].kills +
+            "\n   #3 " + playersSortedByKills[2].playerName + ' (' + playersSortedByKills[2].playerRace + ') - ' + playersSortedByKills[2].kills);
+        sendReply(server, room, sender, "Current Leaderbord for " + targetServer.name + " - Deaths:" +
+            "\n   #1 " + playersSortedByDeaths[0].playerName + ' (' + playersSortedByDeaths[0].playerRace + ') - ' + playersSortedByDeaths[0].deaths +
+            "\n   #2 " + playersSortedByDeaths[1].playerName + ' (' + playersSortedByDeaths[1].playerRace + ') - ' + playersSortedByDeaths[1].deaths +
+            "\n   #3 " + playersSortedByDeaths[2].playerName + ' (' + playersSortedByDeaths[2].playerRace + ') - ' + playersSortedByDeaths[2].deaths);
+        sendReply(server, room, sender, "Top 10 (and more): http://chatbot-sysrage.rhcloud.com");
     }
 },
 { // #### MOTD COMMAND ####
@@ -294,6 +490,223 @@ var chatCommands = [
         }
     }
 },
+{ // #### PLAYERS COMMAND ####
+    command: 'players',
+    help: "The command " + commandChar + "players displays current players on a server.\n" +
+        "\nUsage: " + commandChar + "players [server]\n" +
+        "\nIf [server] is specified, all actions will apply to that server. Otherwise, they will apply to the current server.",
+    exec: function(server, room, sender, message, extras) {
+        var params = getParams(this.command, message);
+        if (params.length > 0) {
+            var sn = params.split(' ')[0].toLowerCase();
+            if (indexOfServer(sn) > -1) {
+                targetServer = config.servers[indexOfServer(sn)];
+            } else {
+                sendReply(server, room, sender, "No server exists named '" + sn + "'.");
+                return;
+            }
+        } else {
+            var targetServer = server;
+        }
+
+        targetServer.cuRest.getPlayers().then(function(players) {
+            switch(onlineStats[targetServer.name].accessLevel) {
+                case 0:
+                    var accessLevel = "Public";
+                    break;
+                case 1:
+                    var accessLevel = "Beta 3";
+                    break;
+                case 2:
+                    var accessLevel = "Beta 2";
+                    break;
+                case 3:
+                    var accessLevel = "Beta 1";
+                    break;
+                case 4:
+                    var accessLevel = "Alpha";
+                    break;
+                case 5:
+                    var accessLevel = "IT";
+                    break;
+                case 6:
+                    var accessLevel = "Development";
+                    break;
+                default:
+                    var accessLevel = "Unknown";
+            }
+
+            var totalPlayers = players.arthurians + players.tuathaDeDanann + players.vikings;
+            sendReply(server, room, sender, "Allowed player type on " + targetServer.name + ": " + accessLevel);
+            sendReply(server, room, sender, "There are currently " + totalPlayers + " players logged in to " + targetServer.name + ":" +
+                "\n   Arthurians: " + players.arthurians +
+                "\n   TuathaDeDanann: " + players.tuathaDeDanann +
+                "\n   Vikings: " + players.vikings);
+        }, function(error) {
+            sendReply(server, room, sender, "Error accessing API. Server may be down.");
+        });
+    }
+},
+{ // #### SCORE COMMAND ####
+    command: 'score',
+    help: "The command " + commandChar + "score displays information for the control game running a server.\n" +
+        "\nUsage: " + commandChar + "score [server]\n" +
+        "\nIf [server] is specified, all actions will apply to that server. Otherwise, they will apply to the current server.",
+    exec: function(server, room, sender, message, extras) {
+        var params = getParams(this.command, message);
+        if (params.length > 0) {
+            var sn = params.split(' ')[0].toLowerCase();
+            if (indexOfServer(sn) > -1) {
+                targetServer = config.servers[indexOfServer(sn)];
+            } else {
+                sendReply(server, room, sender, "No server exists named '" + sn + "'.");
+                return;
+            }
+        } else {
+            var targetServer = server;
+        }
+
+        targetServer.cuRest.getControlGame().then(function(data) {
+            var artScore = data.arthurianScore;
+            var tuaScore = data.tuathaDeDanannScore;
+            var vikScore = data.vikingScore;
+            var timeLeft = data.timeLeft;
+            var minLeft = Math.floor(timeLeft / 60);
+            var secLeft = Math.floor(timeLeft % 60);
+            if (data.gameState === 0) {
+                var gameState = "Disabled";
+            } else if (data.gameState === 1) {
+                var gameState = "Waiting For Next Round";                
+            } else if (data.gameState === 2) {
+                var gameState = "Basic Game Active";                
+            } else if (data.gameState === 3) {
+                var gameState = "Advanced Game Active";                
+            }
+
+            if (gameState === "Disabled") {
+                sendReply(server, room, sender, "The game is currently disabled.");
+            } else {
+                sendReply(server, room, sender, "There is currently " + minLeft + " minutes and " + secLeft + " seconds left in the round." +
+                    "\nGame State: " + gameState +
+                    "\nArthurian Score: " + artScore +
+                    "\nTuathaDeDanann Score: " + tuaScore +
+                    "\nViking Score: " + vikScore);
+            }
+        }, function(error) {
+            sendReply(server, room, sender, "Error accessing API. Server may be down.");
+        });
+    }
+},
+{ // #### SERVERS COMMAND ####
+    command: 'servers',
+    help: "The command " + commandChar + "servers displays currently available servers.\n" +
+        "\nUsage: " + commandChar + "servers",
+    exec: function(server, room, sender, message, extras) {
+
+        server.cuRest.getServers().then(function(data) {
+            var servers = [];
+            var totalServers = 0;
+            var serverList = "";
+            for (var i = 0; i < data.length; i++) {
+                if (data[i].name !== "localhost") {
+                    servers.push({name: data[i].name, host: data[i].host, playerMaximum: data[i].playerMaximum, accessLevel: data[i].accessLevel});
+                    if (totalServers > 0) serverList = serverList + ", ";
+                    serverList = serverList + data[i].name;
+                    totalServers++;
+                }
+            }
+            sendReply(server, room, sender, "There are currently " + totalServers + " servers online: " + serverList);
+        }, function(error) {
+            sendReply(server, room, sender, "Error accessing API. Server may be down.");
+        });
+    }
+},
+{ // #### TEAMSPEAK COMMAND ####
+    command: 'teamspeak',
+    help: "The command " + commandChar + "teamspeak displays information about the community Teamspeak server.\n" +
+        "\nUsage: " + commandChar + "teamspeak", 
+    exec: function(server, room, sender, message, extras) {
+        sendReply(server, room, sender, "Community member Xirrin has been kind enough to provide a Teamspeak server. This can be used for voice" +
+            "chat during CU test events. Request access to the appropriate channels via _global chat or a PM on the forums." +
+            "\n\nTeamspeak Server: oppositionunchained.com (default port)");
+    }
+},
+{ // #### TIPS COMMAND ####
+    command: 'tips',
+    help: "The command " + commandChar + "tips displays tips for new Camelot Unchained users.\n" +
+        "\nUsage: " + commandChar + "tips [user]\n" +
+        "\nIf [user] is specified, tips will be sent to that user. If 'chat' is specified as the user, tips will be sent to chat.", 
+    exec: function(server, room, sender, message, extras) {
+        var params = getParams(this.command, message);
+        if (params.length > 0) {
+            var pn = params.split(' ')[0].toLowerCase();
+            if (pn !== 'chat') {
+                if (room === 'pm') {
+                    // Only allow tips requested via PM to be sent to requester to avoid abuse
+                    sendReply(server, room, sender, "Tips sent to " + sender.split("@")[0] + ".");
+                } else {
+                    // send message as PM to specified user
+                    sendReply(server, room, sender, "Tips sent to " + pn + ".");
+                    room = 'pm';
+                    sender = pn + '@' + server.address;
+                }
+            }
+        } else {
+            // send message as PM to user calling !tips
+            sendReply(server, room, sender, "Tips sent to " + sender.split("@")[0] + ".");
+            if (room !== 'pm') {
+                room = 'pm';
+                sender = sender + '@' + server.address;               
+            }
+        }
+
+        sendReply(server, room, sender, "Quick Tips: Press V to create new spells/abilities || Press B to open spellbook to delete spells/abilities || Type '/hideui perfhud' to hide the statistics window || Type '/suicide' to quickly spawn in a new location");
+        sendReply(server, room, sender, "To help increase performance on older systems type 'shadowMaxDist 0', hold Shift, and press Enter.");
+        sendReply(server, room, sender, "To run the game in full screen at higher resolution hold Alt while clicking the 'Play' button on the launcher and enter 'windowWidth=1920; windowHeight=1080'.");
+        sendReply(server, room, sender, "If you have poor performance on a laptop which contains both integrated and descrete video cards, see this post: http://bit.ly/1JmKCUR");
+        sendReply(server, room, sender, "If something crashes when you do it, don't do it. -Tim");
+        sendReply(server, room, sender, "For other very useful information, please click the 'Alpha Manual' link on the game patcher.");
+    }
+},
+{ // #### TOS COMMAND ####
+    command: 'tos',
+    help: "The command " + commandChar + "tos displays a link to the Terms Of Service forum thread.\n" +
+        "\nUsage: " + commandChar + "tos", 
+    exec: function(server, room, sender, message, extras) {
+        sendReply(server, room, sender, "Be sure to carefully read and abide by the Terms Of Service found here: http://bit.ly/1fLZ5Pk");
+    }
+},
+{ // #### WINS COMMAND ####
+    command: 'wins',
+    help: "The command " + commandChar + "wins displays realm standings for a server.\n" +
+        "\nUsage: " + commandChar + "wins [server]\n" +
+        "\nIf [server] is specified, all actions will apply to that server. Otherwise, they will apply to the current server.",
+    exec: function(server, room, sender, message, extras) {
+        var params = getParams(this.command, message);
+        if (params.length > 0) {
+            var sn = params.split(' ')[0].toLowerCase();
+            if (indexOfServer(sn) > -1) {
+                targetServer = config.servers[indexOfServer(sn)];
+            } else {
+                sendReply(server, room, sender, "No server exists named '" + sn + "'.");
+                return;
+            }
+        } else {
+            var targetServer = server;
+        }
+
+        var firstGame = gameStats[targetServer.name].firstGame;
+        var gameNumber = gameStats[targetServer.name].gameNumber;
+        var artWins = gameStats[targetServer.name].artWins;
+        var tuaWins = gameStats[targetServer.name].tuaWins;
+        var vikWins = gameStats[targetServer.name].vikWins;
+
+        sendReply(server, room, sender, "Out of " + gameStats[targetServer.name].gameNumber + " games played on " + targetServer.name + ", each realm has won as follows:" +
+            "\nArthurian Wins: " + gameStats[targetServer.name].artWins +
+            "\nTuathaDeDanann Wins: " + gameStats[targetServer.name].tuaWins +
+            "\nViking Wins: " + gameStats[targetServer.name].vikWins);
+    }
+},
 // { // #### CLIENTOFF COMMAND ####
 //     command: 'clientoff',
 //     help: "The command " + commandChar + "clientoff allows admins to stop the bot from connecting to a particular server.\n" +
@@ -366,269 +779,6 @@ var chatCommands = [
 //         }
 //     }
 // },
-{ // #### PLAYERS COMMAND ####
-    command: 'players',
-    help: "The command " + commandChar + "players displays current players on a server.\n" +
-        "\nUsage: " + commandChar + "players [server]\n" +
-        "\nIf [server] is specified, all actions will apply to that server. Otherwise, they will apply to the current server.",
-    exec: function(server, room, sender, message, extras) {
-        var params = getParams(this.command, message);
-        if (params.length > 0) {
-            var sn = params.split(' ')[0].toLowerCase();
-            if (indexOfServer(sn) > -1) {
-                targetServer = config.servers[indexOfServer(sn)];
-            } else {
-                sendReply(server, room, sender, "No server exists named '" + sn + "'.");
-                return;
-            }
-        } else {
-            var targetServer = server;
-        }
-
-        targetServer.cuRest.getPlayers().then(function(players) {
-            switch(onlineStats[targetServer.name].accessLevel) {
-                case 0:
-                    var accessLevel = "Public";
-                    break;
-                case 1:
-                    var accessLevel = "Beta 3";
-                    break;
-                case 2:
-                    var accessLevel = "Beta 2";
-                    break;
-                case 3:
-                    var accessLevel = "Beta 1";
-                    break;
-                case 4:
-                    var accessLevel = "Alpha";
-                    break;
-                case 5:
-                    var accessLevel = "IT";
-                    break;
-                case 6:
-                    var accessLevel = "Development";
-                    break;
-                default:
-                    var accessLevel = "Unknown";
-            }
-
-            var totalPlayers = players.arthurians + players.tuathaDeDanann + players.vikings;
-            sendReply(server, room, sender, "Allowed player type on " + targetServer.name + ": " + accessLevel);
-            sendReply(server, room, sender, "There are currently " + totalPlayers + " players logged in to " + targetServer.name + ":" +
-                "\n   Arthurians: " + players.arthurians +
-                "\n   TuathaDeDanann: " + players.tuathaDeDanann +
-                "\n   Vikings: " + players.vikings);
-        }, function(error) {
-            sendReply(server, room, sender, "Error accessing API. Server may be down.");
-        });
-    }
-},
-{ // #### SERVERS COMMAND ####
-    command: 'servers',
-    help: "The command " + commandChar + "servers displays currently available servers.\n" +
-        "\nUsage: " + commandChar + "servers",
-    exec: function(server, room, sender, message, extras) {
-
-        server.cuRest.getServers().then(function(data) {
-            var servers = [];
-            var totalServers = 0;
-            var serverList = "";
-            for (var i = 0; i < data.length; i++) {
-                if (data[i].name !== "localhost") {
-                    servers.push({name: data[i].name, host: data[i].host, playerMaximum: data[i].playerMaximum, accessLevel: data[i].accessLevel});
-                    if (totalServers > 0) serverList = serverList + ", ";
-                    serverList = serverList + data[i].name;
-                    totalServers++;
-                }
-            }
-            sendReply(server, room, sender, "There are currently " + totalServers + " servers online: " + serverList);
-        }, function(error) {
-            sendReply(server, room, sender, "Error accessing API. Server may be down.");
-        });
-    }
-},
-{ // #### EVENTS COMMAND ####
-    command: 'events',
-    help: "The command " + commandChar + "events displays scheduled events for a server.\n" +
-        "\nUsage: " + commandChar + "events [server]\n" +
-        "\nIf [server] is specified, all actions will apply to that server. Otherwise, they will apply to the current server.",
-    exec: function(server, room, sender, message, extras) {
-        var params = getParams(this.command, message);
-        if (params.length > 0) {
-            var sn = params.split(' ')[0].toLowerCase();
-            if (indexOfServer(sn) > -1) {
-                targetServer = config.servers[indexOfServer(sn)];
-            } else {
-                sendReply(server, room, sender, "No server exists named '" + sn + "'.");
-                return;
-            }
-        } else {
-            var targetServer = server;
-        }
-
-        sendReply(server, room, sender, "Calendar showing upcomming events: http://bit.ly/1PopbEY");
-
-        targetServer.cuRest.getEvents().then(function(data) {
-            if (data.length < 1) {
-                sendReply(server, room, sender, "There are currently no events scheduled for " + targetServer.name + ".");
-            } else {
-                data.forEach(function(e) {
-                    util.log(e);
-                    // WAT??? Need CSE to add an event to know what happens here.
-                });
-            }
-        }, function(error) {
-            sendReply(server, room, sender, "Error accessing API. Server may be down.");
-        });
-    }
-},
-{ // #### SCORE COMMAND ####
-    command: 'score',
-    help: "The command " + commandChar + "score displays information for the control game running a server.\n" +
-        "\nUsage: " + commandChar + "score [server]\n" +
-        "\nIf [server] is specified, all actions will apply to that server. Otherwise, they will apply to the current server.",
-    exec: function(server, room, sender, message, extras) {
-        var params = getParams(this.command, message);
-        if (params.length > 0) {
-            var sn = params.split(' ')[0].toLowerCase();
-            if (indexOfServer(sn) > -1) {
-                targetServer = config.servers[indexOfServer(sn)];
-            } else {
-                sendReply(server, room, sender, "No server exists named '" + sn + "'.");
-                return;
-            }
-        } else {
-            var targetServer = server;
-        }
-
-        targetServer.cuRest.getControlGame().then(function(data) {
-            var artScore = data.arthurianScore;
-            var tuaScore = data.tuathaDeDanannScore;
-            var vikScore = data.vikingScore;
-            var timeLeft = data.timeLeft;
-            var minLeft = Math.floor(timeLeft / 60);
-            var secLeft = Math.floor(timeLeft % 60);
-            if (data.gameState === 0) {
-                var gameState = "Disabled";
-            } else if (data.gameState === 1) {
-                var gameState = "Waiting For Next Round";                
-            } else if (data.gameState === 2) {
-                var gameState = "Basic Game Active";                
-            } else if (data.gameState === 3) {
-                var gameState = "Advanced Game Active";                
-            }
-
-            if (gameState === "Disabled") {
-                sendReply(server, room, sender, "The game is currently disabled.");
-            } else {
-                sendReply(server, room, sender, "There is currently " + minLeft + " minutes and " + secLeft + " seconds left in the round." +
-                    "\nGame State: " + gameState +
-                    "\nArthurian Score: " + artScore +
-                    "\nTuathaDeDanann Score: " + tuaScore +
-                    "\nViking Score: " + vikScore);
-            }
-        }, function(error) {
-            sendReply(server, room, sender, "Error accessing API. Server may be down.");
-        });
-    }
-},
-{ // #### WINS COMMAND ####
-    command: 'wins',
-    help: "The command " + commandChar + "wins displays realm standings for a server.\n" +
-        "\nUsage: " + commandChar + "wins [server]\n" +
-        "\nIf [server] is specified, all actions will apply to that server. Otherwise, they will apply to the current server.",
-    exec: function(server, room, sender, message, extras) {
-        var params = getParams(this.command, message);
-        if (params.length > 0) {
-            var sn = params.split(' ')[0].toLowerCase();
-            if (indexOfServer(sn) > -1) {
-                targetServer = config.servers[indexOfServer(sn)];
-            } else {
-                sendReply(server, room, sender, "No server exists named '" + sn + "'.");
-                return;
-            }
-        } else {
-            var targetServer = server;
-        }
-
-        var firstGame = gameStats[targetServer.name].firstGame;
-        var gameNumber = gameStats[targetServer.name].gameNumber;
-        var artWins = gameStats[targetServer.name].artWins;
-        var tuaWins = gameStats[targetServer.name].tuaWins;
-        var vikWins = gameStats[targetServer.name].vikWins;
-
-        sendReply(server, room, sender, "Out of " + gameStats[targetServer.name].gameNumber + " games played on " + targetServer.name + ", each realm has won as follows:" +
-            "\nArthurian Wins: " + gameStats[targetServer.name].artWins +
-            "\nTuathaDeDanann Wins: " + gameStats[targetServer.name].tuaWins +
-            "\nViking Wins: " + gameStats[targetServer.name].vikWins);
-    }
-},
-{ // #### LEADERBOARD COMMAND ####
-    command: 'leaderboard',
-    help: "The command " + commandChar + "leaderboard displays players with the most kills/deaths.\n" +
-        "\nUsage: " + commandChar + "leaderboard [server]\n" +
-        "\nIf [server] is specified, all actions will apply to that server. Otherwise, they will apply to the current server.",
-    exec: function(server, room, sender, message, extras) {
-        var params = getParams(this.command, message);
-        if (params.length > 0) {
-            var sn = params.split(' ')[0].toLowerCase();
-            if (indexOfServer(sn) > -1) {
-                targetServer = config.servers[indexOfServer(sn)];
-            } else {
-                sendReply(server, room, sender, "No server exists named '" + sn + "'.");
-                return;
-            }
-        } else {
-            var targetServer = server;
-        }
-
-        var pStats = playerStats[targetServer.name].concat();
-
-        // Remove bots from rankings
-        for (var i = 0; i < pStats.length; i++) {
-            if (['SuperFireBot','SuperWaterBot','SuperEarthBot'].indexOf(pStats[i].playerName) > -1) {
-                pStats.splice(i, 1);
-                i--;
-            }
-        }
-
-        // Ensure at least 10 entries exist. Create dummy entries if not.
-        for (var i = 0; i < 10; i++) {
-            if (! pStats[i]) pStats[i] = {
-                playerName: 'Nobody',
-                playerFaction: 'None',
-                playerRace: 'None',
-                playerType: 'None',
-                kills: 0,
-                deaths: 0,
-                gamesPlayed: 0
-            };
-        }
-
-        var playersSortedByKills = pStats.concat().sort(function(a, b) { return b.kills - a.kills; });
-        var playersSortedByDeaths = pStats.concat().sort(function(a, b) { return b.deaths - a.deaths; });
-
-        sendReply(server, room, sender, "Current Leaderbord for " + targetServer.name + " - Kills:" +
-            "\n   #1 " + playersSortedByKills[0].playerName + ' (' + playersSortedByKills[0].playerRace + ') - ' + playersSortedByKills[0].kills +
-            "\n   #2 " + playersSortedByKills[1].playerName + ' (' + playersSortedByKills[1].playerRace + ') - ' + playersSortedByKills[1].kills +
-            "\n   #3 " + playersSortedByKills[2].playerName + ' (' + playersSortedByKills[2].playerRace + ') - ' + playersSortedByKills[2].kills);
-        sendReply(server, room, sender, "Current Leaderbord for " + targetServer.name + " - Deaths:" +
-            "\n   #1 " + playersSortedByDeaths[0].playerName + ' (' + playersSortedByDeaths[0].playerRace + ') - ' + playersSortedByDeaths[0].deaths +
-            "\n   #2 " + playersSortedByDeaths[1].playerName + ' (' + playersSortedByDeaths[1].playerRace + ') - ' + playersSortedByDeaths[1].deaths +
-            "\n   #3 " + playersSortedByDeaths[2].playerName + ' (' + playersSortedByDeaths[2].playerRace + ') - ' + playersSortedByDeaths[2].deaths);
-        sendReply(server, room, sender, "Top 10 (and more): http://chatbot-sysrage.rhcloud.com");
-    }
-},
-{ // #### BLOCKS COMMAND ####
-    command: 'blocks',
-    help: "The command " + commandChar + "blocks displays the total number of blocks placed within CUBE.\n" +
-        "\n" + "Usage: " + commandChar + "blocks", 
-    exec: function(server, room, sender, message, extras) {
-        getCUBECount(function (cubeCount) {
-            sendReply(server, room, sender, "Players have placed a total of " + cubeCount + " blocks within the world.");
-        });
-    }
-}
 ];
 
 // Add list of available commands to the output of !help
@@ -650,7 +800,24 @@ function checkInternet(server, callback) {
         } else {
             callback(true);
         }
-    })
+    });
+}
+
+// function to read in the saved chatlog
+function getChatlog(server) {
+    fs.readFile(server.chatlogFile, function(err, data) {
+        if (err && err.code === 'ENOENT') {
+            server.chatlog = {};
+            fs.writeFile(server.chatlogFile, JSON.stringify(server.chatlog), function(err) {
+                if (err) {
+                    return util.log("[ERROR] Unable to create chatlog file.");
+                }
+                util.log("[STATUS] Chatlog file did not exist. Empty file created.");
+            });
+        } else {
+            server.chatlog = JSON.parse(data);
+        }
+    });
 }
 
 // function to get CUBE count
@@ -1033,6 +1200,28 @@ function sendToIT(message) {
     });
 }
 
+// function to add message to chat log and expire old messages
+function updateChatlog(server, room, message) {
+    var curISODate = new Date().toISOString();
+    server.chatlog[room].push(message);
+
+    // Remove expired messages
+    for (var roomName in server.chatlog) {
+        for (var i = 0; i < server.chatlog[roomName].length; i++) {
+            if (moment(curISODate).diff(server.chatlog[roomName][i].timestamp, "hours") > config.chatlogLimit) {
+                server.chatlog[roomName].splice(i, 1);
+                i--;
+            }            
+        }
+    }
+
+    fs.writeFile(server.chatlogFile, JSON.stringify(server.chatlog), function(err) {
+        if (err) {
+            util.log("[ERROR] Unable to write chatlog file (" + server.name + ").");
+        }
+    });
+}
+
 // Timer to verify client is still connected
 var timerConnected = function(server) { return setInterval(function() { checkLastStanza(server); }, 1000); };
 function checkLastStanza(server) {
@@ -1053,7 +1242,7 @@ function checkServerOnline(server) {
         var currentOnline = false;
         var currentAccess = 6;
         var statusChange = false;
-        for (j = 0; j < data.length; j++) {
+        for (var j = 0; j < data.length; j++) {
             var serverEntry = data[j];
             if (serverEntry.name.toLowerCase() === server.name.toLowerCase()) {
                 currentOnline = true;
@@ -1072,7 +1261,7 @@ function checkServerOnline(server) {
                 if (! onlineStats[server.name].online && currentOnline) {
                     // Server was offline, is now online.
                     statusChange = true;
-                    for (i = 5; i > currentAccess - 1; i--) {
+                    for (var i = 5; i > currentAccess - 1; i--) {
                         switch(i) {
                             case 5:
                                 // Server now open to IT -- Send notice to IT
@@ -1105,7 +1294,7 @@ function checkServerOnline(server) {
                     if (onlineStats[server.name].accessLevel < currentAccess) {
                         // Server was online but access level has gone up
                         statusChange = true;
-                        for (i = onlineStats[server.name].accessLevel; i < currentAccess; i++) {
+                        for (var i = onlineStats[server.name].accessLevel; i < currentAccess; i++) {
                             switch(i) {
                                 case 5:
                                     // Server no longer open to IT -- Send notice to IT
@@ -1137,7 +1326,7 @@ function checkServerOnline(server) {
                     } else if (onlineStats[server.name].accessLevel > currentAccess) {
                         // Server was online but access level has gone down
                         statusChange = true;
-                        for (i = onlineStats[server.name].accessLevel - 1; i > currentAccess - 1; i--) {
+                        for (var i = onlineStats[server.name].accessLevel - 1; i > currentAccess - 1; i--) {
                             switch(i) {
                                 case 5:
                                     // Server now open to IT -- Send notice to IT
@@ -1175,7 +1364,7 @@ function checkServerOnline(server) {
         if (onlineStats[server.name].online && ! currentOnline) {
             // Server was online, is now offline.
             statusChange = true;
-            for (i = 5; i > onlineStats[server.name].accessLevel - 1; i--) {
+            for (var i = 5; i > onlineStats[server.name].accessLevel - 1; i--) {
                 switch(i) {
                     case 5:
                         // Server now open to IT -- Send notice to IT
@@ -1501,6 +1690,11 @@ function startClient(server) {
                         c('x', { xmlns: 'http://jabber.org/protocol/muc' })
                     );
                     util.log("[STATUS] Client joined '" + room.name + "' on " + server.name + ".");
+
+                    // Chatlog initialization
+                    if (room.log) {
+                        if (! server.chatlog[room.name]) server.chatlog[room.name] = [];
+                    }
                 });
 
                 // Start sending MOTDs
@@ -1573,6 +1767,7 @@ function startClient(server) {
                         return;
                     }
 
+                    var curISODate = new Date().toISOString();
                     var message = body.getText();
                     var sender = stanza.attrs.from.split('/')[1];
                     var senderName = sender.split('@')[0];
@@ -1582,10 +1777,21 @@ function startClient(server) {
                         var cse = stanza.getChild('cseflags').attrs.cse;
                     }
                     var roomIsMonitored = server.rooms[indexOfRoom(server, roomName)].monitor;
+                    var roomIsLogged = server.rooms[indexOfRoom(server, roomName)].log;
 
                     if (cse === "cse" || isMOTDAdmin(senderName)) {
                         motdadmin = true;
                     } else motdadmin = false;
+
+                    // Store message for logged rooms and clean up existing logs
+                    if (roomIsLogged) {
+                        var newLogMsg = {
+                            timestamp: curISODate,
+                            sender: senderName,
+                            message: message
+                        }
+                        updateChatlog(server, roomName, newLogMsg);
+                    }
 
                     // If message matches a defined command, run it
                     if (message[0] === commandChar) {
@@ -1700,6 +1906,7 @@ config.servers.forEach(function(server) {
     server.cuRest = new cuRestAPI(server.name);
 
     // Server initialization
+    getChatlog(server);
     getMOTD(server);
     getMOTDIgnore(server);
     getOnlineStats(server);
