@@ -730,6 +730,8 @@ var chatCommands = [
         sendReply(server, room, sender, "Quick Tips: Press V to create new spells/abilities || Press B to open spellbook to delete spells/abilities || Type '/suicide' to quickly spawn in a new location");
         sendReply(server, room, sender, "To resize or rearrange the user interface, click the lock icon (bottom-right of screen). Use the mousewheel to resize windows.");
         sendReply(server, room, sender, "To run the game in full screen at higher resolution hold Alt while clicking the 'Play' button on the launcher and enter 'windowWidth=1920; windowHeight=1080'.");
+        sendReply(server, room, sender, "To help with aiming arrows, press . (period) to toggle an alternate aiming mode.");
+        sendReply(server, room, sender, "Available key bindings can be viewed/modified in settings by pressing Escape.");
         // sendReply(server, room, sender, "To help increase performance on older systems type 'shadowMaxDist 0', hold Shift, and press Enter.");
         sendReply(server, room, sender, "If you have poor performance on a laptop which contains both integrated and descrete video cards, see this post: http://bit.ly/1JmKCUR");
         sendReply(server, room, sender, "If something crashes when you do it, don't do it. -Tim (Do report it, though!)");
