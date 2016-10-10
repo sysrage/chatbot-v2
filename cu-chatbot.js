@@ -371,6 +371,14 @@ var chatCommands = [
 //         sendReply(server, room, sender, "Top 10 (and more): http://chatbot-sysrage.rhcloud.com");
 //     }
 // },
+{ // #### MARC COMMAND ####
+    command: 'marc',
+    help: "The command " + commandChar + "marc displays information about Marc.\n" +
+        "\nUsage: " + commandChar + "marc",
+    exec: function(server, room, sender, message, extras) {
+        sendReply(server, room, sender, "http://i.imgur.com/6HBPRnm.jpg");
+    }
+},
 // { // #### MOTD COMMAND ####
 //     command: 'motd',
 //     help: "The command " + commandChar + "motd allows setting and viewing the MOTD for a server.\n" +
@@ -1324,7 +1332,17 @@ function checkServerOnline(server) {
             var serverEntry = data[j];
             if (serverEntry.name.toLowerCase() === server.name.toLowerCase()) {
                 currentOnline = true;
-                currentAccess = serverEntry.accessLevel;
+                var accessLevels = {
+                    'Invalid': -1,
+                    'Public': 0,
+                    'Beta3': 1,
+                    'Beta2': 2,
+                    'Beta1': 3,
+                    'Alpha': 4,
+                    'InternalTest': 5,
+                    'Employees': 6
+                };
+                currentAccess = accessLevels[serverEntry.accessLevel];
 
                 // Access Levels:
                 // Invalid = -1,
