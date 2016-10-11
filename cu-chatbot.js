@@ -1332,19 +1332,7 @@ function checkServerOnline(server) {
             var serverEntry = data[j];
             if (serverEntry.name.toLowerCase() === server.name.toLowerCase()) {
                 currentOnline = true;
-                var accessLevels = {
-                    'Invalid': -1,
-                    'Public': 0,
-                    'Beta3': 1,
-                    'Beta2': 2,
-                    'Beta1': 3,
-                    'Alpha': 4,
-                    'InternalTest': 5,
-                    'Employees': 6
-                };
-                currentAccess = accessLevels[serverEntry.accessLevel];
-                console.log('serverEntry.accessLevel: ' + serverEntry.accessLevel);
-                console.log('currentAccess (top): ' + currentAccess);
+                currentAccess = serverEntry.accessLevel;
 
                 // Access Levels:
                 // Invalid = -1,
