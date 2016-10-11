@@ -1343,6 +1343,8 @@ function checkServerOnline(server) {
                     'Employees': 6
                 };
                 currentAccess = accessLevels[serverEntry.accessLevel];
+                console.log('serverEntry.accessLevel: ' + serverEntry.accessLevel);
+                console.log('currentAccess (top): ' + currentAccess);
 
                 // Access Levels:
                 // Invalid = -1,
@@ -1495,6 +1497,7 @@ function checkServerOnline(server) {
             onlineStats[server.name].online = currentOnline;
             onlineStats[server.name].accessLevel = currentAccess;
             onlineStats[server.name].lastNotice = epochTime;
+            console.log('currentAccess (end): ' + currentAccess);
 
             fs.writeFile(server.onlineFile, JSON.stringify(onlineStats[server.name]), function(err) {
                 if (err) {
