@@ -1341,8 +1341,8 @@ function checkServerOnline(server) {
                 // Beta2 = 2,
                 // Beta1 = 3,
                 // Alpha = 4,
-                // IT = 5, // called InternalTest on /api/servers
-                // Devs = 6, // called Employees on /api/servers
+                // IT = 5, // called InternalTest in API
+                // Devs = 6, // called Employees in API
 
                 if (! onlineStats[server.name].online && currentOnline) {
                     // Server was offline, is now online.
@@ -1485,7 +1485,6 @@ function checkServerOnline(server) {
             onlineStats[server.name].online = currentOnline;
             onlineStats[server.name].accessLevel = currentAccess;
             onlineStats[server.name].lastNotice = epochTime;
-            console.log('currentAccess (end): ' + currentAccess);
 
             fs.writeFile(server.onlineFile, JSON.stringify(onlineStats[server.name]), function(err) {
                 if (err) {
