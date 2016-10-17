@@ -253,6 +253,14 @@ var chatCommands = [
         sendReply(server, room, sender, "http://ft.trillian.im/af0f242d455e9f185639905ece7a631f656553c6/6AZkvU0ukO6wr5Gaqil7C2hmOqy6H.gif");
     }
 },
+{ // #### DANCE COMMAND ####
+    command: 'dance',
+    help: "The command " + commandChar + "dance displays a Tyler dance party.\n" +
+        "\nUsage: " + commandChar + "dance",
+    exec: function(server, room, sender, message, extras) {
+        sendReply(server, room, sender, "http://i.imgur.com/cs4jQaa.gif");
+    }
+},
 { // #### DISCORD COMMAND ####
     command: 'discord',
     help: "The command " + commandChar + "discord displays information about the Camelot Unchained Discord server.\n" +
