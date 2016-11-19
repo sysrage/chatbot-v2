@@ -1807,7 +1807,7 @@ function startClient(server) {
             // Parse each stanza from the XMPP server
             client[server.name].xmpp.on('stanza', function(stanza) {
 
-                 // util.log('***** ' + stanza + ' *****');
+                util.log('***** ' + stanza + ' *****');
 
                 // Store time of last received stanza for checking connection status
                 server.lastStanza = Math.floor((new Date).getTime() / 1000);
