@@ -1732,6 +1732,7 @@ function sendMOTD(server) {
 
 // function to start a new client for a particular server
 function startClient(server) {
+    // console.log('*** starting client for server: ' + server.name);
     // Verify internet connectivity or node-xmpp will barf
     checkInternet(server, function(isConnected) {
         if (! isConnected) {
@@ -1740,6 +1741,7 @@ function startClient(server) {
             return;
         } else {
             // Start to XMPP client
+            console.log('*** starting client for server: ' + server.name);
             client[server.name] = {
                 xmpp: new xmpp.Client({
                     jid: server.username + '/bot-' + random(6),
@@ -1807,7 +1809,7 @@ function startClient(server) {
             // Parse each stanza from the XMPP server
             client[server.name].xmpp.on('stanza', function(stanza) {
 
-                util.log('***** ' + stanza + ' *****');
+                // util.log('***** ' + stanza + ' *****');
 
                 // Store time of last received stanza for checking connection status
                 server.lastStanza = Math.floor((new Date).getTime() / 1000);
