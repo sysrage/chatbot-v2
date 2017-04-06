@@ -1339,8 +1339,7 @@ function checkServerOnline(server) {
         for (var j = 0; j < data.length; j++) {
             var serverEntry = data[j];
             if (serverEntry.name.toLowerCase() === server.name.toLowerCase()) {
-                console.dir(serverEntry)
-                if (serverEntry.status === 'Online') currentOnline = true;
+                if (serverEntry.status === 2) currentOnline = true;
                 currentAccess = serverEntry.accessLevel;
 
                 // Access Levels:
