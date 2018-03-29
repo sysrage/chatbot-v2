@@ -79,7 +79,7 @@ function getOnlineStats(server) {
                 var onlineStats = JSON.parse(data);
             }
             fulfill(onlineStats);
-        });    
+        });
     });
 }
 
@@ -107,8 +107,11 @@ var SampleApp = function() {
      */
     self.setupVariables = function() {
         //  Set the environment variables we need.
-        self.ipaddress = process.env.OPENSHIFT_NODEJS_IP;
-        self.port      = process.env.OPENSHIFT_NODEJS_PORT || 8080;
+        // self.ipaddress = process.env.OPENSHIFT_NODEJS_IP;
+        // self.port      = process.env.OPENSHIFT_NODEJS_PORT || 8080;
+        self.ipaddress = '0.0.0.0';
+        self.port = 8080;
+
 
         if (typeof self.ipaddress === "undefined") {
             //  Log errors on OpenShift but continue w/ 127.0.0.1 - this
@@ -193,7 +196,7 @@ var SampleApp = function() {
 
                 var resultQueue = new queue(4, function() {
                     // Build final page to display.
-                    server[s.name].pageContent = 
+                    server[s.name].pageContent =
                             '<tr><td colspan="3"><center><p class="serverTitle">' + s.name.charAt(0).toUpperCase() + s.name.slice(1) + '</p></center></td></tr><tr>' +
                             '<td valign="top" width="36%" bgcolor="#606060" style="border-style:groove; border-color:#C0C0C0"><center><table width="100%">' +
                                 '<tr><td bgcolor="#F3E2A9"><center><p class="sectionTitle">Current Score</p></center></td></tr>' +
@@ -206,7 +209,7 @@ var SampleApp = function() {
                             '<td valign="top" width="36%" bgcolor="#606060" style="border-style:groove; border-color:#C0C0C0"><center><table width="100%">' +
                                 '<tr><td bgcolor="#F3E2A9"><center><p class="sectionTitle">Realm History</p></center></td></tr>' +
                                 '<tr><td>' + server[s.name].wins + '</td></tr>' +
-                            '</table></center></td></tr>' + 
+                            '</table></center></td></tr>' +
                             '<tr><td colspan="3" valign="top" bgcolor="#606060" style="border-style:groove; border-color:#C0C0C0"><center><table width="100%">' +
                                 '<tr><td bgcolor="#F3E2A9"><center><p class="sectionTitle">Leaderboard</p></center></td></tr>' +
                                 '<tr><td>' + server[s.name].leaderboard + '</td></tr>' +
@@ -233,11 +236,11 @@ var SampleApp = function() {
                     if (data.gameState === 0) {
                         var gameState = "Disabled"
                     } else if (data.gameState === 1) {
-                        var gameState = "Waiting For Next Round";                
+                        var gameState = "Waiting For Next Round";
                     } else if (data.gameState === 2) {
-                        var gameState = "Basic Game Active";                
+                        var gameState = "Basic Game Active";
                     } else if (data.gameState === 3) {
-                        var gameState = "Advanced Game Active";                
+                        var gameState = "Advanced Game Active";
                     }
 
                     server[s.name].score = '<b>Game State:</b> ' + gameState +
@@ -530,7 +533,7 @@ var SampleApp = function() {
      */
     self.initializeServer = function() {
         self.createRoutes();
-        self.app = express.createServer();
+        self.app = express();
 
         self.app.use('/images', express.static(__dirname+'/images'));
 
