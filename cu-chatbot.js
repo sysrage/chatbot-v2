@@ -546,63 +546,63 @@ var chatCommands = [
         sendReply(server, room, sender, "http://ft.trillian.im/4d2383906547ba7d47025082cb36b88f1402eb1f/6FFQEoWZtCVmHMCfbh5ZTaH2uFjTz.gif");
     }
 },
-{ // #### PLAYERS COMMAND ####
-    command: 'players',
-    help: "The command " + commandChar + "players displays current players on a server.\n" +
-        "\nUsage: " + commandChar + "players [server]\n" +
-        "\nIf [server] is specified, all actions will apply to that server. Otherwise, they will apply to the current server.",
-    exec: function(server, room, sender, message, extras) {
-        var params = getParams(this.command, message);
-        if (params.length > 0) {
-            var sn = params.split(' ')[0].toLowerCase();
-            if (indexOfServer(sn) > -1) {
-                targetServer = config.servers[indexOfServer(sn)];
-            } else {
-                sendReply(server, room, sender, "No server exists named '" + sn + "'.");
-                return;
-            }
-        } else {
-            var targetServer = server;
-        }
+// { // #### PLAYERS COMMAND ####
+//     command: 'players',
+//     help: "The command " + commandChar + "players displays current players on a server.\n" +
+//         "\nUsage: " + commandChar + "players [server]\n" +
+//         "\nIf [server] is specified, all actions will apply to that server. Otherwise, they will apply to the current server.",
+//     exec: function(server, room, sender, message, extras) {
+//         var params = getParams(this.command, message);
+//         if (params.length > 0) {
+//             var sn = params.split(' ')[0].toLowerCase();
+//             if (indexOfServer(sn) > -1) {
+//                 targetServer = config.servers[indexOfServer(sn)];
+//             } else {
+//                 sendReply(server, room, sender, "No server exists named '" + sn + "'.");
+//                 return;
+//             }
+//         } else {
+//             var targetServer = server;
+//         }
 
-        targetServer.cuRest.getPlayers().then(function(players) {
-            switch(onlineStats[targetServer.name].accessLevel) {
-                case 0:
-                    var accessLevel = "Public";
-                    break;
-                case 1:
-                    var accessLevel = "Beta 3";
-                    break;
-                case 2:
-                    var accessLevel = "Beta 2";
-                    break;
-                case 3:
-                    var accessLevel = "Beta 1";
-                    break;
-                case 4:
-                    var accessLevel = "Alpha";
-                    break;
-                case 5:
-                    var accessLevel = "IT";
-                    break;
-                case 6:
-                    var accessLevel = "Development";
-                    break;
-                default:
-                    var accessLevel = "Unknown";
-            }
+//         targetServer.cuRest.getPlayers().then(function(players) {
+//             switch(onlineStats[targetServer.name].accessLevel) {
+//                 case 0:
+//                     var accessLevel = "Public";
+//                     break;
+//                 case 1:
+//                     var accessLevel = "Beta 3";
+//                     break;
+//                 case 2:
+//                     var accessLevel = "Beta 2";
+//                     break;
+//                 case 3:
+//                     var accessLevel = "Beta 1";
+//                     break;
+//                 case 4:
+//                     var accessLevel = "Alpha";
+//                     break;
+//                 case 5:
+//                     var accessLevel = "IT";
+//                     break;
+//                 case 6:
+//                     var accessLevel = "Development";
+//                     break;
+//                 default:
+//                     var accessLevel = "Unknown";
+//             }
 
-            var totalPlayers = players.arthurians + players.tuathaDeDanann + players.vikings;
-            sendReply(server, room, sender, "Allowed player type on " + targetServer.name + ": " + accessLevel);
-            sendReply(server, room, sender, "There are currently " + totalPlayers + " players logged in to " + targetServer.name + ":" +
-                "\n   Arthurians: " + players.arthurians +
-                "\n   TuathaDeDanann: " + players.tuathaDeDanann +
-                "\n   Vikings: " + players.vikings);
-        }, function(error) {
-            sendReply(server, room, sender, "Error accessing API. Server may be down.");
-        });
-    }
-},
+//             var totalPlayers = players.arthurians + players.tuathaDeDanann + players.vikings;
+//             sendReply(server, room, sender, "Allowed player type on " + targetServer.name + ": " + accessLevel);
+//             sendReply(server, room, sender, "There are currently " + totalPlayers + " players logged in to " + targetServer.name + ":" +
+//                 "\n   Arthurians: " + players.arthurians +
+//                 "\n   TuathaDeDanann: " + players.tuathaDeDanann +
+//                 "\n   Vikings: " + players.vikings);
+//         }, function(error) {
+//             sendReply(server, room, sender, "Error accessing API. Server may be down.");
+//         });
+//     }
+// },
 { // #### ROLL COMMAND ####
     command: 'roll',
     help: "The command " + commandChar + "roll will roll dice for a random number.\n" +
@@ -2014,7 +2014,7 @@ config.servers.forEach(function(server) {
     server.onlineTimer = timerServerOnline(server);
 
     // Start watching Control Game
-    server.gameTimer = timerControlGame(server);
+    // server.gameTimer = timerControlGame(server);
 
     // Start XMPP client
     startClient(server);
