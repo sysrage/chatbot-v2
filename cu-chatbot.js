@@ -1742,7 +1742,6 @@ function startClient(server) {
         } else {
             // Start to XMPP client
             console.log('*** starting client for server: ' + server.name);
-            console.log('user: ' + server.username + ' | pass: ' + server.password);
             client[server.name] = {
                 xmpp: new xmpp.Client({
                     jid: server.username + '/bot-' + random(6),
