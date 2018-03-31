@@ -1338,6 +1338,8 @@ function checkServerOnline(server) {
         var statusChange = false;
         for (var j = 0; j < data.length; j++) {
             var serverEntry = data[j];
+            console.log('***');
+            console.dir(serverEntry);
             if (serverEntry.name.toLowerCase() === server.name.toLowerCase()) {
                 if (serverEntry.status === 2) currentOnline = true;
                 currentAccess = serverEntry.accessLevel;
@@ -2002,13 +2004,13 @@ config.servers.forEach(function(server) {
     server.cuRest = new cuRestAPI(server.name);
 
     // Server initialization
-    getChatlog(server);
-    getMOTD(server);
-    getMOTDIgnore(server);
+    // getChatlog(server);
+    // getMOTD(server);
+    // getMOTDIgnore(server);
     getOnlineStats(server);
-    getGameStats(server);
-    getPlayerStats(server);
-    server.motdReceivers = [];
+    // getGameStats(server);
+    // getPlayerStats(server);
+    // server.motdReceivers = [];
 
     // Start watching server online status for Alpha/Beta notices
     server.onlineTimer = timerServerOnline(server);
@@ -2017,5 +2019,5 @@ config.servers.forEach(function(server) {
     // server.gameTimer = timerControlGame(server);
 
     // Start XMPP client
-    startClient(server);
+    // startClient(server);
 });
